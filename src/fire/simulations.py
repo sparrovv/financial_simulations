@@ -1,5 +1,6 @@
 from dataclasses import dataclass, asdict
 from datetime import date
+from typing import Literal
 
 
 @dataclass
@@ -18,6 +19,10 @@ class FireSimulation:
     annual_inflation_rate: float = 0
     # this should be more or less the same as the inflation rate
     annual_property_appreciation_rate: float = 0
+    invest_cash_surplus: bool = False
+    # this says what's the threshold over which the cash should be invested based on the strategy
+    invest_cash_threshold: float = 0
+    invest_cash_surplus_strategy: Literal["80-20", "100", "60-40", "50-50"] = "80-20"
 
     # monthly_mortgage
     # combined_mortgage_left: float
@@ -37,16 +42,18 @@ class FireSimulation:
         return asdict(self) | {"wealth": self.wealth}
 
 
-# inflation rate rules:
-# apply inflation rate to monthly expenses
-# apply inflation rate to monthly income ?
-# apply inflation rate to properties monthly income ?
+def run_simulation(init: FireSimulation, months: int) -> list[FireSimulation]:
+    simulations = [init]
+    for _ in range(months):
+        next_sim = simulate_next(simulations[-1])
+        simulations.append(next_sim)
+    return simulations
 
 
 def simulate_next(prev: FireSimulation) -> FireSimulation:
     # add one month to the start date, year should change if month is 12
 
-    next_month = prev.start_date.replace(
+    new_start_date = prev.start_date.replace(
         month=prev.start_date.month + 1 if prev.start_date.month < 12 else 1,
         year=(
             prev.start_date.year + 1
@@ -131,6 +138,25 @@ def simulate_next(prev: FireSimulation) -> FireSimulation:
         new_bonds_investments = 0
         new_cash = -cash_needed
 
+    # if there's a surplus of cash, we should invest it
+    if prev.invest_cash_surplus:
+        amount_over_threshold = new_cash - prev.invest_cash_threshold
+
+        if amount_over_threshold > 0:
+            if prev.invest_cash_surplus_strategy == "80-20":
+                new_stock_investments += amount_over_threshold * 0.8
+                new_bonds_investments += amount_over_threshold * 0.2
+            elif prev.invest_cash_surplus_strategy == "100":
+                new_stock_investments += amount_over_threshold
+            elif prev.invest_cash_surplus_strategy == "60-40":
+                new_stock_investments += amount_over_threshold * 0.6
+                new_bonds_investments += amount_over_threshold * 0.4
+            elif prev.invest_cash_surplus_strategy == "50-50":
+                new_stock_investments += amount_over_threshold * 0.5
+                new_bonds_investments += amount_over_threshold * 0.5
+
+            new_cash -= amount_over_threshold
+
     return FireSimulation(
         stock_investments=new_stock_investments,
         bonds_investments=new_bonds_investments,
@@ -144,54 +170,10 @@ def simulate_next(prev: FireSimulation) -> FireSimulation:
         return_rate_from_bonds=prev.return_rate_from_bonds,
         monthly_expenses=total_monthly_expenses,
         monthly_income=prev.monthly_income,
-        start_date=next_month,
         annual_inflation_rate=prev.annual_inflation_rate,
         annual_property_appreciation_rate=prev.annual_property_appreciation_rate,
+        invest_cash_surplus=prev.invest_cash_surplus,
+        invest_cash_threshold=prev.invest_cash_threshold,
+        invest_cash_surplus_strategy=prev.invest_cash_surplus_strategy,
+        start_date=new_start_date,
     )
-
-
-def calculate_monthly_mortgage_payment(
-    mortgage_left: float, mortgage_rate: float, mortgage_months: int
-) -> tuple[float, float]:
-    """to calculate the monthly mortgage payment, we need to use the formula:
-    mortgage_payment = P[r(1+r)^n]/[(1+r)^n - 1]
-    where:
-    P = principal loan amount
-    r = monthly interest rate
-    n = number of months
-    """
-    if mortgage_months == 0:
-        return 0, 0
-
-    r = mortgage_rate / 12
-
-    pmt = mortgage_left * (
-        (r * ((1 + r) ** mortgage_months)) / (((1 + r) ** mortgage_months) - 1)
-    )
-
-    monthly_interest = mortgage_left * r
-
-    return pmt, monthly_interest
-
-
-def calculate_mortgage(
-    principal_amount: float, mortgage_rate: float, mortgage_months: int
-) -> tuple[float, float]:
-    # Convert annual rate to a decimal and then divide by 12 for a monthly rate
-    r = mortgage_rate / 12
-
-    # Monthly Mortgage Payment Calculation
-    if r != 0:
-        # If there's an actual interest rate apply full formula
-        M = (
-            principal_amount
-            * (r * ((1 + r) ** mortgage_months))
-            / (((1 + r) ** mortgage_months) - 1)
-        )
-
-        # Initial Month Interest Calculation
-        initial_interest = principal_amount * r
-
-        return M, initial_interest
-    else:
-        return principal_amount / mortgage_months, 0
