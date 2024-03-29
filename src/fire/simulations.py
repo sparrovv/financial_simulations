@@ -8,27 +8,57 @@ class FireSimulation:
     bonds_investments: float
     properties_market_value: float
     properties_monthly_income: float
-    # monthly_mort
+
+    cash: float
+    monthly_expenses: float
+    monthly_income: float
+    start_date: date
+    return_rate_from_investment: float
+    return_rate_from_bonds: float = 0
+    annual_inflation_rate: float = 0
+    # this should be more or less the same as the inflation rate
+    annual_property_appreciation_rate: float = 0
+
+    # monthly_mortgage
     # combined_mortgage_left: float
     # combined_mortgage_rate: float
     # combined_mortgage_months: int
 
-    cash: float
-    return_rate_from_investment: float
-    monthly_expenses: float
-    monthly_income: float
-    start_date: date
+    @property
+    def wealth(self) -> float:
+        return (
+            self.stock_investments
+            + self.bonds_investments
+            + self.properties_market_value
+            + self.cash
+        )
 
     def to_dict(self):
-        return asdict(self)
+        return asdict(self) | {"wealth": self.wealth}
+
+
+# inflation rate rules:
+# apply inflation rate to monthly expenses
+# apply inflation rate to monthly income ?
+# apply inflation rate to properties monthly income ?
 
 
 def simulate_next(prev: FireSimulation) -> FireSimulation:
-    # add one month to the start date
-    next_month = prev.start_date.replace(month=prev.start_date.month + 1)
+    # add one month to the start date, year should change if month is 12
 
-    # total expenses
-    total_monthly_expenses = prev.monthly_expenses
+    next_month = prev.start_date.replace(
+        month=prev.start_date.month + 1 if prev.start_date.month < 12 else 1,
+        year=(
+            prev.start_date.year + 1
+            if prev.start_date.month == 12
+            else prev.start_date.year
+        ),
+    )
+
+    # total expenses should include inflation rate
+    total_monthly_expenses = prev.monthly_expenses * (
+        1 + prev.annual_inflation_rate / 12
+    )
 
     # total income
     total_monthly_cash = (
@@ -36,30 +66,66 @@ def simulate_next(prev: FireSimulation) -> FireSimulation:
     )
     prev.cash += prev.monthly_income + prev.properties_monthly_income
 
-    new_bonds_investments = prev.bonds_investments
-    new_stock_investments = prev.stock_investments
+    new_properties_market_value = round(
+        prev.properties_market_value
+        + (prev.properties_market_value * prev.annual_property_appreciation_rate / 12),
+        2,
+    )
+
+    new_bonds_investments = round(
+        prev.bonds_investments
+        + (prev.bonds_investments * prev.return_rate_from_bonds / 12),
+        2,
+    )
+    # if there are any stock investments, calculate the return rate and add it to the stock investments
+    new_stock_investments = round(
+        prev.stock_investments
+        + (prev.stock_investments * prev.return_rate_from_investment / 12),
+        2,
+    )
 
     if total_monthly_cash > total_monthly_expenses:
         new_cash = total_monthly_cash - total_monthly_expenses
-    elif (total_monthly_cash + prev.stock_investments) > total_monthly_expenses:
+    elif (total_monthly_cash + new_stock_investments) > total_monthly_expenses:
         new_cash = 0
         cash_needed = total_monthly_expenses - prev.cash
-        new_stock_investments = prev.stock_investments - cash_needed
+        new_stock_investments -= cash_needed
     elif (
-        total_monthly_cash + prev.stock_investments + prev.bonds_investments
+        total_monthly_cash + new_stock_investments + new_bonds_investments
     ) > total_monthly_expenses:
         new_cash = 0
         cash_needed = (
-            total_monthly_expenses - total_monthly_cash - prev.stock_investments
+            total_monthly_expenses - total_monthly_cash - new_stock_investments
         )
         new_stock_investments = 0
-        new_bonds_investments = prev.bonds_investments - cash_needed
+        new_bonds_investments -= cash_needed
+    elif (
+        total_monthly_cash
+        + new_stock_investments
+        + new_bonds_investments
+        + new_properties_market_value
+    ) > total_monthly_expenses:
+        # we need to sell a property, let's assume we sell the property for its market value, and we put all the cash in the bank
+        # for now, but it should be invested in stocks or bonds and follow the investment strategy
+        new_cash = 0
+        new_cash += new_properties_market_value
+        new_properties_market_value = 0
+
+        cash_needed = (
+            total_monthly_expenses
+            - total_monthly_cash
+            - new_stock_investments
+            - new_bonds_investments
+        )
+        new_stock_investments = 0
+        new_bonds_investments = 0
+        new_cash -= cash_needed
     else:
         cash_needed = (
             total_monthly_expenses
             - total_monthly_cash
-            - prev.stock_investments
-            - prev.bonds_investments
+            - new_stock_investments
+            - new_bonds_investments
         )
         new_stock_investments = 0
         new_bonds_investments = 0
@@ -68,16 +134,19 @@ def simulate_next(prev: FireSimulation) -> FireSimulation:
     return FireSimulation(
         stock_investments=new_stock_investments,
         bonds_investments=new_bonds_investments,
-        properties_market_value=prev.properties_market_value,
+        properties_market_value=new_properties_market_value,
         properties_monthly_income=prev.properties_monthly_income,
         # combined_mortgage_left=prev.combined_mortgage_left,
         # combined_mortgage_rate=prev.combined_mortgage_rate,
         # combined_mortgage_months=prev.combined_mortgage_months,
         cash=new_cash,
         return_rate_from_investment=prev.return_rate_from_investment,
-        monthly_expenses=prev.monthly_expenses,
+        return_rate_from_bonds=prev.return_rate_from_bonds,
+        monthly_expenses=total_monthly_expenses,
         monthly_income=prev.monthly_income,
         start_date=next_month,
+        annual_inflation_rate=prev.annual_inflation_rate,
+        annual_property_appreciation_rate=prev.annual_property_appreciation_rate,
     )
 
 
