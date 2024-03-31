@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from mortgage import calculate_monthly_payment
+from .mortgage import calculate_monthly_payment
 
 
 def test_mortgage() -> None:

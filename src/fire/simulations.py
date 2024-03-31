@@ -1,45 +1,110 @@
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field, replace
 from datetime import date
 from typing import Literal
+from .mortgage import calculate_monthly_payment
+from decimal import Decimal
+
+
+@dataclass
+class InvestmentProperty:
+    market_value: Decimal
+    monthly_income: Decimal
+    mortgage_left: Decimal
+    mortgage_rate: Decimal
+    mortgage_months: int
+
+    def is_with_mortgage(self) -> bool:
+        return self.mortgage_left > 0
+
+    def net_cash_value(self) -> Decimal:
+        return self.market_value - self.mortgage_left
+
+    def to_dict(self):
+        return asdict(self) | {"net_cash_value": self.net_cash_value()}
+
+
+def simulate_next_property_month(
+    prev: InvestmentProperty, annual_property_appreciation_rate: Decimal
+) -> InvestmentProperty:
+    new_market_value = round(
+        prev.market_value
+        + (prev.market_value * annual_property_appreciation_rate / Decimal(12)),
+        2,
+    )
+
+    if prev.is_with_mortgage() is False:
+        return replace(prev, market_value=new_market_value)
+
+    monthly_payment, monthly_interest = calculate_monthly_payment(
+        principal=prev.mortgage_left,
+        rate=prev.mortgage_rate,
+        number_of_months_left=prev.mortgage_months,
+    )
+
+    # calculate the principal
+    monthly_principal = monthly_payment - monthly_interest
+
+    new_mortgage_left = prev.mortgage_left - monthly_principal
+    new_mortgage_months = prev.mortgage_months - 1
+
+    return InvestmentProperty(
+        market_value=new_market_value,
+        monthly_income=prev.monthly_income,
+        mortgage_left=new_mortgage_left,
+        mortgage_rate=prev.mortgage_rate,
+        mortgage_months=new_mortgage_months,
+    )
 
 
 @dataclass
 class FireSimulation:
     stock_investments: float
     bonds_investments: float
-    properties_market_value: float
-    properties_monthly_income: float
 
     cash: float
     monthly_expenses: float
     monthly_income: float
     start_date: date
     return_rate_from_investment: float
+
+    investment_properties: list[InvestmentProperty] = field(default_factory=list)
     return_rate_from_bonds: float = 0
     annual_inflation_rate: float = 0
     # this should be more or less the same as the inflation rate
-    annual_property_appreciation_rate: float = 0
+    annual_property_appreciation_rate: Decimal = Decimal(0)
     invest_cash_surplus: bool = False
     # this says what's the threshold over which the cash should be invested based on the strategy
     invest_cash_threshold: float = 0
     invest_cash_surplus_strategy: Literal["80-20", "100", "60-40", "50-50"] = "80-20"
 
-    # monthly_mortgage
-    # combined_mortgage_left: float
-    # combined_mortgage_rate: float
-    # combined_mortgage_months: int
+    @property
+    def properties_market_value(self) -> float:
+        return sum([float(p.market_value) for p in self.investment_properties])
+
+    @property
+    def properties_monthly_income(self) -> float:
+        return sum([float(p.monthly_income) for p in self.investment_properties])
+
+    @property
+    def properties_net_cash_value(self) -> float:
+        return sum([float(p.net_cash_value()) for p in self.investment_properties])
 
     @property
     def wealth(self) -> float:
         return (
             self.stock_investments
             + self.bonds_investments
-            + self.properties_market_value
+            + self.properties_net_cash_value
             + self.cash
         )
 
     def to_dict(self):
-        return asdict(self) | {"wealth": self.wealth}
+        return asdict(self) | {
+            "wealth": self.wealth,
+            "properties_market_value": self.properties_market_value,
+            "properties_monthly_income": self.properties_monthly_income,
+            "properties_net_cash_value": self.properties_net_cash_value,
+        }
 
 
 def run_simulation(init: FireSimulation, months: int) -> list[FireSimulation]:
@@ -62,6 +127,11 @@ def simulate_next(prev: FireSimulation) -> FireSimulation:
         ),
     )
 
+    new_investment_properties = [
+        simulate_next_property_month(prop, prev.annual_property_appreciation_rate)
+        for prop in prev.investment_properties
+    ]
+
     # total expenses should include inflation rate
     total_monthly_expenses = prev.monthly_expenses * (
         1 + prev.annual_inflation_rate / 12
@@ -71,12 +141,9 @@ def simulate_next(prev: FireSimulation) -> FireSimulation:
     total_monthly_cash = (
         prev.cash + prev.monthly_income + prev.properties_monthly_income
     )
-    prev.cash += prev.monthly_income + prev.properties_monthly_income
 
-    new_properties_market_value = round(
-        prev.properties_market_value
-        + (prev.properties_market_value * prev.annual_property_appreciation_rate / 12),
-        2,
+    new_properties_net_cash_value = sum(
+        [float(p.net_cash_value()) for p in new_investment_properties]
     )
 
     new_bonds_investments = round(
@@ -95,7 +162,7 @@ def simulate_next(prev: FireSimulation) -> FireSimulation:
         new_cash = total_monthly_cash - total_monthly_expenses
     elif (total_monthly_cash + new_stock_investments) > total_monthly_expenses:
         new_cash = 0
-        cash_needed = total_monthly_expenses - prev.cash
+        cash_needed = total_monthly_expenses - total_monthly_cash
         new_stock_investments -= cash_needed
     elif (
         total_monthly_cash + new_stock_investments + new_bonds_investments
@@ -110,13 +177,22 @@ def simulate_next(prev: FireSimulation) -> FireSimulation:
         total_monthly_cash
         + new_stock_investments
         + new_bonds_investments
-        + new_properties_market_value
+        + new_properties_net_cash_value
     ) > total_monthly_expenses:
-        # we need to sell a property, let's assume we sell the property for its market value, and we put all the cash in the bank
-        # for now, but it should be invested in stocks or bonds and follow the investment strategy
+        # we need to sell a property, if we have one then we sell it
+        # if we have more than one, we sell the one with the lowest net cash value
+        # then we add the cash to the cash account
+
+        to_delete_property = min(
+            new_investment_properties, key=lambda p: p.net_cash_value()
+        )
+        new_investment_properties.remove(to_delete_property)
+
         new_cash = 0
-        new_cash += new_properties_market_value
-        new_properties_market_value = 0
+        new_cash += float(to_delete_property.net_cash_value())
+        # new_properties_net_cash_value = sum(
+        #     [float(p.net_cash_value()) for p in new_investment_properties]
+        # )
 
         cash_needed = (
             total_monthly_expenses
@@ -159,12 +235,8 @@ def simulate_next(prev: FireSimulation) -> FireSimulation:
 
     return FireSimulation(
         stock_investments=new_stock_investments,
+        investment_properties=new_investment_properties,
         bonds_investments=new_bonds_investments,
-        properties_market_value=new_properties_market_value,
-        properties_monthly_income=prev.properties_monthly_income,
-        # combined_mortgage_left=prev.combined_mortgage_left,
-        # combined_mortgage_rate=prev.combined_mortgage_rate,
-        # combined_mortgage_months=prev.combined_mortgage_months,
         cash=new_cash,
         return_rate_from_investment=prev.return_rate_from_investment,
         return_rate_from_bonds=prev.return_rate_from_bonds,
