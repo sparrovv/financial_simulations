@@ -10,6 +10,7 @@ python = "^3.11"
 jupyter = "^1.0.0"
 pandas = "^2.2.1"
 plotly = "^5.20.0"
+streamlit = "^1.32.2"
 
 
 [tool.poetry.group.dev.dependencies]
