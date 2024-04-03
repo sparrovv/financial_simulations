@@ -15,7 +15,7 @@ from fire.simulations import FireSimulation, run_simulation, InvestmentProperty
 
 st.title("Simulate your savings and wealth growth over time")
 
-years = st.slider("how_many_years_to_simulate", 0, 30, 5)
+years = st.slider("how_many_years_to_simulate", 0, 30, 15)
 
 st.subheader("Provide monthly income and expenses:")
 monthly_income = st.slider("income", 0, 100_000, 10_000)
@@ -36,9 +36,9 @@ investment_properties: list[InvestmentProperty] = []
 
 for i in range(number_of_investment_properties):
     st.subheader(f"Property {i+1}")
-    market_value = st.slider(f"market_value_{i+1}", 0, 10_00_000, 100_000)
-    mortgage_left = st.slider(f"mortgage_left_{i+1}", 0, 3_000_000, 400_000)
-    mortgage_months = st.slider(f"mortgage_months_{i+1}", 0, 200, 50)
+    market_value = st.slider(f"market_value_{i+1}", 0, 3_000_000, 500_000)
+    mortgage_left = st.slider(f"mortgage_left_{i+1}", 0, 3_000_000, 500_000)
+    mortgage_months = st.slider(f"mortgage_months_{i+1}", 0, 360, 360)
     property_monthly_income = st.slider(
         f"property_monthly_income_{i+1}", 0, 10_000, 2500
     )
@@ -76,7 +76,7 @@ init = FireSimulation(
     invest_cash_surplus=invest_cash_surplus,
     invest_cash_threshold=invest_cash_threshold,
     invest_cash_surplus_strategy="80-20",
-    start_date=datetime.datetime.fromisoformat("2024-03-01"),
+    date=datetime.datetime.fromisoformat("2024-03-01"),
 )
 
 # simulate for next X years
@@ -90,22 +90,30 @@ df
 
 st.subheader("The wealth graph")
 
-fig = px.line(
+fig = px.bar(
     df,
-    x="start_date",
+    x="date",
     y=[
-        "monthly_expenses",
+        "properties_net_cash_value",
         "stock_investments",
         "bonds_investments",
-        "properties_net_cash_value",
         "cash",
-        "wealth_inc_properties",
-        "liquid_wealth",
     ],
+    title="Wealth over time",
 )
-fig.update_layout(
-    legend=dict(orientation="h", yanchor="bottom", y=-0.25, xanchor="right", x=0.5)
+fig.add_scatter(
+    x=df["date"], y=df["monthly_expenses"], mode="lines", name="Monthly expenses"
 )
+fig.add_scatter(
+    x=df["date"], y=df["monthly_income"], mode="lines", name="Monthly income"
+)
+fig.add_scatter(
+    x=df["date"],
+    y=df["wealth_inc_properties"],
+    mode="lines",
+    name="Wealth with net properties",
+)
+
 fig
 
 st.subheader("Investment properties")

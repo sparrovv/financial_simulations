@@ -14,7 +14,7 @@ def test_simulation_when_enough_not_enough_cash() -> None:
         return_rate_from_investment=0,
         monthly_expenses=11_000,
         monthly_income=0,
-        start_date=date(2021, 1, 1),
+        date=date(2021, 1, 1),
     )
 
     next_sim = simulate_next(init)
@@ -39,7 +39,7 @@ def test_simulation_when_enough_not_enough_cash() -> None:
         "properties_monthly_income": 0,
         "properties_net_cash_value": 0,
         "liquid_wealth": 9000.0,
-        "start_date": date(2021, 2, 1),
+        "date": date(2021, 2, 1),
     }
 
 
@@ -52,7 +52,7 @@ def test_simulation_when_enough_cash_and_stock_and_bonds() -> None:
         return_rate_from_investment=0,
         monthly_expenses=21_000,
         monthly_income=0,
-        start_date=date(2021, 1, 1),
+        date=date(2021, 1, 1),
     )
 
     next_sim = simulate_next(init)
@@ -77,7 +77,7 @@ def test_simulation_when_enough_cash_and_stock_and_bonds() -> None:
         "invest_cash_surplus_strategy": "80-20",
         "invest_cash_threshold": 0,
         "properties_net_cash_value": 0,
-        "start_date": date(2021, 2, 1),
+        "date": date(2021, 2, 1),
     }
 
 
@@ -90,7 +90,7 @@ def test_simulation_when_not_enough_cash_and_stock() -> None:
         return_rate_from_investment=0,
         monthly_expenses=31_000,
         monthly_income=0,
-        start_date=date(2021, 1, 1),
+        date=date(2021, 1, 1),
     )
 
     next_sim = simulate_next(init)
@@ -115,7 +115,7 @@ def test_simulation_when_not_enough_cash_and_stock() -> None:
         "invest_cash_surplus_strategy": "80-20",
         "invest_cash_threshold": 0,
         "properties_net_cash_value": 0,
-        "start_date": date(2021, 2, 1),
+        "date": date(2021, 2, 1),
     }
 
 
@@ -128,7 +128,7 @@ def test_when_monthly_income_is_present() -> None:
         return_rate_from_investment=0,
         monthly_expenses=21_000,
         monthly_income=11_000,
-        start_date=date(2021, 1, 1),
+        date=date(2021, 1, 1),
     )
 
     next_sim = simulate_next(init)
@@ -153,7 +153,7 @@ def test_when_monthly_income_is_present() -> None:
         "invest_cash_surplus_strategy": "80-20",
         "invest_cash_threshold": 0,
         "properties_net_cash_value": 0,
-        "start_date": date(2021, 2, 1),
+        "date": date(2021, 2, 1),
     }
 
 
@@ -175,7 +175,7 @@ def test_when_monthly_income_from_properties_without_mortgage_is_present() -> No
         return_rate_from_investment=0,
         monthly_expenses=11_000,
         monthly_income=0,
-        start_date=date(2021, 1, 1),
+        date=date(2021, 1, 1),
     )
 
     next_sim = simulate_next(init)
@@ -210,7 +210,7 @@ def test_when_monthly_income_from_properties_without_mortgage_is_present() -> No
         "invest_cash_surplus": False,
         "invest_cash_surplus_strategy": "80-20",
         "invest_cash_threshold": 0,
-        "start_date": date(2021, 2, 1),
+        "date": date(2021, 2, 1),
     }
 
     assert next_sim.to_dict() == expected
@@ -234,7 +234,7 @@ def test_when_monthly_income_from_properties_with_mortgage_is_present() -> None:
         return_rate_from_investment=0,
         monthly_expenses=11_000,
         monthly_income=0,
-        start_date=date(2021, 1, 1),
+        date=date(2021, 1, 1),
     )
 
     next_sim = simulate_next(init)
@@ -269,7 +269,7 @@ def test_when_monthly_income_from_properties_with_mortgage_is_present() -> None:
         "invest_cash_surplus": False,
         "invest_cash_surplus_strategy": "80-20",
         "invest_cash_threshold": 0,
-        "start_date": date(2021, 2, 1),
+        "date": date(2021, 2, 1),
     }
 
     assert next_sim.to_dict() == expected
@@ -295,7 +295,7 @@ def test_when_monthly_income_from_properties_with_mortgage_is_present_and_need_t
         return_rate_from_investment=0,
         monthly_expenses=15_000,
         monthly_income=0,
-        start_date=date(2021, 1, 1),
+        date=date(2021, 1, 1),
     )
 
     next_sim = simulate_next(init)
@@ -320,7 +320,7 @@ def test_when_monthly_income_from_properties_with_mortgage_is_present_and_need_t
         "invest_cash_surplus": False,
         "invest_cash_surplus_strategy": "80-20",
         "invest_cash_threshold": 0,
-        "start_date": date(2021, 2, 1),
+        "date": date(2021, 2, 1),
     }
 
     assert next_sim.to_dict() == expected
@@ -335,7 +335,7 @@ def test_when_applying_stock_investment_return_rates() -> None:
         return_rate_from_investment=0.05,
         monthly_expenses=11_000,
         monthly_income=0,
-        start_date=date(2021, 1, 1),
+        date=date(2021, 1, 1),
     )
 
     next_sim = simulate_next(init)
@@ -360,7 +360,7 @@ def test_when_applying_stock_investment_return_rates() -> None:
         "invest_cash_surplus": False,
         "invest_cash_surplus_strategy": "80-20",
         "invest_cash_threshold": 0,
-        "start_date": date(2021, 2, 1),
+        "date": date(2021, 2, 1),
     }
 
 
@@ -374,7 +374,7 @@ def test_when_applying_bonds_investment_return_rates() -> None:
         return_rate_from_bonds=0.03,
         monthly_expenses=11_000,
         monthly_income=0,
-        start_date=date(2021, 1, 1),
+        date=date(2021, 1, 1),
     )
 
     next_sim = simulate_next(init)
@@ -399,7 +399,7 @@ def test_when_applying_bonds_investment_return_rates() -> None:
         "invest_cash_surplus": False,
         "invest_cash_surplus_strategy": "80-20",
         "invest_cash_threshold": 0,
-        "start_date": date(2021, 2, 1),
+        "date": date(2021, 2, 1),
     }
 
 
@@ -414,7 +414,7 @@ def test_when_applying_inflation_rate_to_monthly_expenses() -> None:
         monthly_expenses=11_000,
         monthly_income=0,
         annual_inflation_rate=0.03,
-        start_date=date(2021, 1, 1),
+        date=date(2021, 1, 1),
     )
 
     next_sim = simulate_next(init)
@@ -439,7 +439,7 @@ def test_when_applying_inflation_rate_to_monthly_expenses() -> None:
         "invest_cash_surplus": False,
         "invest_cash_surplus_strategy": "80-20",
         "invest_cash_threshold": 0,
-        "start_date": date(2021, 2, 1),
+        "date": date(2021, 2, 1),
     }
 
 
@@ -458,7 +458,7 @@ def test_that_surplus_money_is_invested() -> None:
         invest_cash_surplus=True,
         invest_cash_surplus_strategy="80-20",
         invest_cash_threshold=10_000,
-        start_date=date(2021, 1, 1),
+        date=date(2021, 1, 1),
     )
 
     next_sim = simulate_next(init)
@@ -483,5 +483,5 @@ def test_that_surplus_money_is_invested() -> None:
         "invest_cash_surplus": True,
         "invest_cash_surplus_strategy": "80-20",
         "invest_cash_threshold": 10_000,
-        "start_date": date(2021, 2, 1),
+        "date": date(2021, 2, 1),
     }

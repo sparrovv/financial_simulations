@@ -81,7 +81,7 @@ class FireSimulation:
     cash: float
     monthly_expenses: float
     monthly_income: float
-    start_date: date
+    date: date
     return_rate_from_investment: float
 
     investment_properties: list[InvestmentProperty] = field(default_factory=list)
@@ -154,13 +154,9 @@ def run_simulation(init: FireSimulation, months: int) -> list[FireSimulation]:
 def simulate_next(prev: FireSimulation) -> FireSimulation:
     # add one month to the start date, year should change if month is 12
 
-    new_start_date = prev.start_date.replace(
-        month=prev.start_date.month + 1 if prev.start_date.month < 12 else 1,
-        year=(
-            prev.start_date.year + 1
-            if prev.start_date.month == 12
-            else prev.start_date.year
-        ),
+    new_date = prev.date.replace(
+        month=prev.date.month + 1 if prev.date.month < 12 else 1,
+        year=(prev.date.year + 1 if prev.date.month == 12 else prev.date.year),
     )
 
     new_investment_properties = [
@@ -280,5 +276,5 @@ def simulate_next(prev: FireSimulation) -> FireSimulation:
         invest_cash_surplus=prev.invest_cash_surplus,
         invest_cash_threshold=prev.invest_cash_threshold,
         invest_cash_surplus_strategy=prev.invest_cash_surplus_strategy,
-        start_date=new_start_date,
+        date=new_date,
     )
