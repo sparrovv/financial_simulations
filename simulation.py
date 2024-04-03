@@ -1,18 +1,17 @@
 import sys
 from pathlib import Path
+import streamlit as st
+import pandas as pd
+import datetime
+import plotly.express as px
+from decimal import Decimal
 
 project_root = Path.cwd()
 src_path = project_root / "src"
 
 sys.path.append(str(src_path))
 
-import streamlit as st
-import pandas as pd
-import datetime
 from fire.simulations import FireSimulation, run_simulation, InvestmentProperty
-import plotly.express as px
-from decimal import Decimal
-
 
 st.title("Simulate your savings and wealth growth over time")
 
@@ -28,7 +27,11 @@ bond_investment = st.slider("bond_investment", 0, 10_00_000, 100_000)
 cash = st.slider("cash", 0, 10_00_000, 50_000)
 
 st.subheader("Any investment properties?")
-number_of_investment_properties = st.slider("Number of investment properties?", 0, 6, 0)
+
+number_of_investment_properties = st.number_input(
+    "Number of investment properties?", 0, 6, 0
+)
+# st.slider("Number of investment properties?", 0, 6, 0)
 investment_properties: list[InvestmentProperty] = []
 
 for i in range(number_of_investment_properties):
@@ -96,8 +99,12 @@ fig = px.line(
         "bonds_investments",
         "properties_net_cash_value",
         "cash",
-        "wealth",
+        "wealth_inc_properties",
+        "liquid_wealth",
     ],
+)
+fig.update_layout(
+    legend=dict(orientation="h", yanchor="bottom", y=-0.25, xanchor="right", x=0.5)
 )
 fig
 

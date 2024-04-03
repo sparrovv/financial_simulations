@@ -1,4 +1,4 @@
-# Wealth / savings / FIRE simulation
+# Financial simulations
 
 This project started with these two questions:
 

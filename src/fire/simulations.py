@@ -1,8 +1,12 @@
 from dataclasses import dataclass, asdict, field, replace
 from datetime import date
-from typing import Literal
+from typing import Literal, Optional
 from .mortgage import calculate_monthly_payment
 from decimal import Decimal
+from logging import getLogger
+
+
+logger = getLogger(__name__)
 
 
 @dataclass
@@ -12,6 +16,8 @@ class InvestmentProperty:
     mortgage_left: Decimal
     mortgage_rate: Decimal
     mortgage_months: int
+    monthly_interest: Optional[Decimal] = None
+    monthly_payment: Optional[Decimal] = None
 
     def is_with_mortgage(self) -> bool:
         return self.mortgage_left > 0
@@ -21,6 +27,17 @@ class InvestmentProperty:
 
     def to_dict(self):
         return asdict(self) | {"net_cash_value": self.net_cash_value()}
+
+    def __post_init__(self):
+        if self.is_with_mortgage():
+            monthly_payment, monthly_interest = calculate_monthly_payment(
+                principal=self.mortgage_left,
+                rate=self.mortgage_rate,
+                number_of_months_left=self.mortgage_months,
+            )
+
+            self.monthly_interest = monthly_interest
+            self.monthly_payment = monthly_payment
 
 
 def simulate_next_property_month(
@@ -35,14 +52,14 @@ def simulate_next_property_month(
     if prev.is_with_mortgage() is False:
         return replace(prev, market_value=new_market_value)
 
-    monthly_payment, monthly_interest = calculate_monthly_payment(
-        principal=prev.mortgage_left,
-        rate=prev.mortgage_rate,
-        number_of_months_left=prev.mortgage_months,
-    )
+    # monthly_payment, monthly_interest = calculate_monthly_payment(
+    #     principal=prev.mortgage_left,
+    #     rate=prev.mortgage_rate,
+    #     number_of_months_left=prev.mortgage_months,
+    # )
 
     # calculate the principal
-    monthly_principal = monthly_payment - monthly_interest
+    monthly_principal = (prev.monthly_payment or 0) - (prev.monthly_interest or 0)
 
     new_mortgage_left = prev.mortgage_left - monthly_principal
     new_mortgage_months = prev.mortgage_months - 1
@@ -90,7 +107,11 @@ class FireSimulation:
         return sum([float(p.net_cash_value()) for p in self.investment_properties])
 
     @property
-    def wealth(self) -> float:
+    def liquid_wealth(self) -> float:
+        return self.stock_investments + self.bonds_investments + self.cash
+
+    @property
+    def wealth_inc_properties(self) -> float:
         return (
             self.stock_investments
             + self.bonds_investments
@@ -98,9 +119,21 @@ class FireSimulation:
             + self.cash
         )
 
+    @property
+    def properties_monthly_mortgage(self) -> float:
+        return sum(
+            [
+                p.monthly_payment
+                for p in self.investment_properties
+                if p.is_with_mortgage()
+            ]
+        )
+
     def to_dict(self):
         return asdict(self) | {
-            "wealth": self.wealth,
+            "liquid_wealth": self.liquid_wealth,
+            "wealth_inc_properties": self.wealth_inc_properties,
+            "properties_monthly_mortgage": self.properties_monthly_mortgage,
             "properties_market_value": self.properties_market_value,
             "properties_monthly_income": self.properties_monthly_income,
             "properties_net_cash_value": self.properties_net_cash_value,
@@ -111,6 +144,9 @@ def run_simulation(init: FireSimulation, months: int) -> list[FireSimulation]:
     simulations = [init]
     for _ in range(months):
         next_sim = simulate_next(simulations[-1])
+        if next_sim.wealth_inc_properties < 0:
+            break
+
         simulations.append(next_sim)
     return simulations
 
@@ -160,19 +196,19 @@ def simulate_next(prev: FireSimulation) -> FireSimulation:
 
     if total_monthly_cash > total_monthly_expenses:
         new_cash = total_monthly_cash - total_monthly_expenses
-    elif (total_monthly_cash + new_stock_investments) > total_monthly_expenses:
+    elif (total_monthly_cash + new_bonds_investments) > total_monthly_expenses:
         new_cash = 0
         cash_needed = total_monthly_expenses - total_monthly_cash
-        new_stock_investments -= cash_needed
+        new_bonds_investments -= cash_needed
     elif (
-        total_monthly_cash + new_stock_investments + new_bonds_investments
+        total_monthly_cash + new_bonds_investments + new_stock_investments
     ) > total_monthly_expenses:
         new_cash = 0
         cash_needed = (
-            total_monthly_expenses - total_monthly_cash - new_stock_investments
+            total_monthly_expenses - total_monthly_cash - new_bonds_investments
         )
-        new_stock_investments = 0
-        new_bonds_investments -= cash_needed
+        new_bonds_investments = 0
+        new_stock_investments -= cash_needed
     elif (
         total_monthly_cash
         + new_stock_investments
@@ -190,9 +226,6 @@ def simulate_next(prev: FireSimulation) -> FireSimulation:
 
         new_cash = 0
         new_cash += float(to_delete_property.net_cash_value())
-        # new_properties_net_cash_value = sum(
-        #     [float(p.net_cash_value()) for p in new_investment_properties]
-        # )
 
         cash_needed = (
             total_monthly_expenses
