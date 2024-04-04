@@ -1,19 +1,21 @@
-from dataclasses import asdict
 from datetime import date
 from decimal import Decimal
 
 from .simulations import FireSimulation, InvestmentProperty, simulate_next
+from decimal import Decimal
+from decimal import Decimal
+from decimal import Decimal
 
 
 def test_simulation_when_enough_not_enough_cash() -> None:
     init = FireSimulation(
-        stock_investments=0,
-        bonds_investments=10_000,
+        stock_investments=Decimal("0"),
+        bonds_investments=Decimal("10_000"),
         investment_properties=[],
-        cash=10_000,
-        stock_return_rate=0,
-        monthly_expenses=11_000,
-        monthly_income=0,
+        cash=Decimal("10_000"),
+        stock_return_rate=Decimal("0"),
+        monthly_expenses=Decimal("11_000"),
+        monthly_income=Decimal("0"),
         date=date(2021, 1, 1),
     )
 
@@ -46,13 +48,13 @@ def test_simulation_when_enough_not_enough_cash() -> None:
 
 def test_simulation_when_enough_cash_and_stock_and_bonds() -> None:
     init = FireSimulation(
-        stock_investments=10_000,
-        bonds_investments=10_000,
+        stock_investments=Decimal("10_000"),
+        bonds_investments=Decimal("10_000"),
         investment_properties=[],
-        cash=10_000,
-        stock_return_rate=0,
-        monthly_expenses=21_000,
-        monthly_income=0,
+        cash=Decimal("10_000"),
+        stock_return_rate=Decimal("0"),
+        monthly_expenses=Decimal("21_000"),
+        monthly_income=Decimal("0"),
         date=date(2021, 1, 1),
     )
 
@@ -85,13 +87,13 @@ def test_simulation_when_enough_cash_and_stock_and_bonds() -> None:
 
 def test_simulation_when_not_enough_cash_and_stock() -> None:
     init = FireSimulation(
-        stock_investments=10_000,
-        bonds_investments=10_000,
+        stock_investments=Decimal("10_000"),
+        bonds_investments=Decimal("10_000"),
         investment_properties=[],
-        cash=10_000,
-        stock_return_rate=0,
-        monthly_expenses=31_000,
-        monthly_income=0,
+        cash=Decimal("10_000"),
+        stock_return_rate=Decimal("0"),
+        monthly_expenses=Decimal("31_000"),
+        monthly_income=Decimal("0"),
         date=date(2021, 1, 1),
     )
 
@@ -124,13 +126,13 @@ def test_simulation_when_not_enough_cash_and_stock() -> None:
 
 def test_when_monthly_income_is_present() -> None:
     init = FireSimulation(
-        stock_investments=0,
-        bonds_investments=10_000,
+        stock_investments=Decimal("0"),
+        bonds_investments=Decimal("10_000"),
         investment_properties=[],
-        cash=10_000,
-        stock_return_rate=0,
-        monthly_expenses=21_000,
-        monthly_income=11_000,
+        cash=Decimal("10_000"),
+        stock_return_rate=Decimal("0"),
+        monthly_expenses=Decimal("21_000"),
+        monthly_income=Decimal("11_000"),
         date=date(2021, 1, 1),
     )
 
@@ -163,8 +165,8 @@ def test_when_monthly_income_is_present() -> None:
 
 def test_when_monthly_income_from_properties_without_mortgage_is_present() -> None:
     init = FireSimulation(
-        stock_investments=0,
-        bonds_investments=0,
+        stock_investments=Decimal("0"),
+        bonds_investments=Decimal("0"),
         investment_properties=[
             InvestmentProperty(
                 mortgage_left=Decimal("0"),
@@ -175,10 +177,10 @@ def test_when_monthly_income_from_properties_without_mortgage_is_present() -> No
             )
         ],
         annual_property_appreciation_rate=Decimal("0.1"),
-        cash=10_000,
-        stock_return_rate=0,
-        monthly_expenses=11_000,
-        monthly_income=0,
+        cash=Decimal("10_000"),
+        stock_return_rate=Decimal("0"),
+        monthly_expenses=Decimal("11_000"),
+        monthly_income=Decimal("0"),
         date=date(2021, 1, 1),
     )
 
@@ -196,17 +198,17 @@ def test_when_monthly_income_from_properties_without_mortgage_is_present() -> No
                 "mortgage_months": 0,
                 "market_value": Decimal("100_833.33"),
                 "monthly_income": Decimal(2_000),
-                "monthly_interest": None,
-                "monthly_payment": None,
+                "monthly_interest": 0,
+                "monthly_payment": 0,
             }
         ],
         "stock_return_rate": 0,
         "annual_income_increase_rate": 0,
         "liquid_wealth": 1000,
-        "wealth_inc_properties": 101833.33,
+        "wealth_inc_properties": Decimal("101833.33"),
         "properties_monthly_mortgage": 0,
-        "properties_market_value": 100833.33,
-        "properties_net_cash_value": 100833.33,
+        "properties_market_value": Decimal("100833.33"),
+        "properties_net_cash_value": Decimal("100833.33"),
         "monthly_expenses": 11_000,
         "monthly_income": 0,
         "bonds_return_rate": 0,
@@ -223,22 +225,22 @@ def test_when_monthly_income_from_properties_without_mortgage_is_present() -> No
 
 def test_when_monthly_income_from_properties_with_mortgage_is_present() -> None:
     init = FireSimulation(
-        stock_investments=0,
-        bonds_investments=0,
+        stock_investments=Decimal("0"),
+        bonds_investments=Decimal("0"),
         investment_properties=[
             InvestmentProperty(
                 mortgage_left=Decimal("100000"),
                 mortgage_rate=Decimal("10"),
                 mortgage_months=100,
-                market_value=Decimal("100_000"),
-                monthly_income=Decimal("2_000"),
+                market_value=Decimal("100000"),
+                monthly_income=Decimal("2000"),
             )
         ],
         annual_property_appreciation_rate=Decimal("0.1"),
-        cash=10_000,
-        stock_return_rate=0,
-        monthly_expenses=11_000,
-        monthly_income=0,
+        cash=Decimal("10000"),
+        stock_return_rate=Decimal("0"),
+        monthly_expenses=Decimal("11000"),
+        monthly_income=Decimal("0"),
         date=date(2021, 1, 1),
     )
 
@@ -263,10 +265,10 @@ def test_when_monthly_income_from_properties_with_mortgage_is_present() -> None:
         "stock_return_rate": 0,
         "annual_income_increase_rate": 0,
         "liquid_wealth": 1000,
-        "wealth_inc_properties": 2477.81,
+        "wealth_inc_properties": Decimal("2477.81"),
         "properties_monthly_mortgage": Decimal("1477.81"),
-        "properties_market_value": 100833.33,
-        "properties_net_cash_value": 1477.81,
+        "properties_market_value": Decimal("100833.33"),
+        "properties_net_cash_value": Decimal("1477.81"),
         "monthly_expenses": 11_000,
         "monthly_income": 0,
         "bonds_return_rate": 0,
@@ -285,8 +287,8 @@ def test_when_monthly_income_from_properties_with_mortgage_is_present_and_need_t
     None
 ):
     init = FireSimulation(
-        stock_investments=0,
-        bonds_investments=0,
+        stock_investments=Decimal("0"),
+        bonds_investments=Decimal("0"),
         investment_properties=[
             InvestmentProperty(
                 mortgage_left=Decimal("0"),
@@ -297,10 +299,10 @@ def test_when_monthly_income_from_properties_with_mortgage_is_present_and_need_t
             )
         ],
         annual_property_appreciation_rate=Decimal("0"),
-        cash=10_000,
-        stock_return_rate=0,
-        monthly_expenses=15_000,
-        monthly_income=0,
+        cash=Decimal("10_000"),
+        stock_return_rate=Decimal("0"),
+        monthly_expenses=Decimal("15_000"),
+        monthly_income=Decimal("0"),
         date=date(2021, 1, 1),
     )
 
@@ -335,30 +337,30 @@ def test_when_monthly_income_from_properties_with_mortgage_is_present_and_need_t
 
 def test_when_applying_stock_investment_return_rates() -> None:
     init = FireSimulation(
-        stock_investments=100_000,
-        bonds_investments=0,
+        stock_investments=Decimal("100000"),
+        bonds_investments=Decimal("0"),
         investment_properties=[],
-        cash=11_000,
-        stock_return_rate=0.05,
-        monthly_expenses=11_000,
-        monthly_income=0,
+        cash=Decimal("11000"),
+        stock_return_rate=Decimal("0.05"),
+        monthly_expenses=Decimal("11000"),
+        monthly_income=Decimal("0"),
         date=date(2021, 1, 1),
     )
 
     next_sim = simulate_next(init)
 
     assert next_sim.to_dict() == {
-        "stock_investments": 100_416.67,
+        "stock_investments": Decimal("100_416.67"),
         "bonds_investments": 0,
         "annual_income_increase_rate": 0,
         "properties_market_value": 0,
         "properties_monthly_income": 0,
         "cash": 0,
         "investment_properties": [],
-        "liquid_wealth": 100416.67,
+        "liquid_wealth": Decimal("100416.67"),
         "properties_monthly_mortgage": 0,
-        "wealth_inc_properties": 100416.67,
-        "stock_return_rate": 0.05,
+        "wealth_inc_properties": Decimal("100416.67"),
+        "stock_return_rate": Decimal("0.05"),
         "monthly_expenses": 11_000,
         "monthly_income": 0,
         "bonds_return_rate": 0,
@@ -374,14 +376,14 @@ def test_when_applying_stock_investment_return_rates() -> None:
 
 def test_when_applying_bonds_investment_return_rates() -> None:
     init = FireSimulation(
-        stock_investments=0,
-        bonds_investments=100_000,
+        stock_investments=Decimal("0"),
+        bonds_investments=Decimal("100000"),
         investment_properties=[],
-        cash=11_000,
-        stock_return_rate=0,
-        bonds_return_rate=0.03,
-        monthly_expenses=11_000,
-        monthly_income=0,
+        cash=Decimal("11000"),
+        stock_return_rate=Decimal("0"),
+        bonds_return_rate=Decimal("0.03"),
+        monthly_expenses=Decimal("11000"),
+        monthly_income=Decimal("0"),
         date=date(2021, 1, 1),
     )
 
@@ -399,7 +401,7 @@ def test_when_applying_bonds_investment_return_rates() -> None:
         "properties_monthly_mortgage": 0,
         "wealth_inc_properties": 100250.0,
         "stock_return_rate": 0,
-        "bonds_return_rate": 0.03,
+        "bonds_return_rate": Decimal("0.03"),
         "monthly_expenses": 11_000,
         "monthly_income": 0,
         "annual_inflation_rate": 0,
@@ -414,15 +416,15 @@ def test_when_applying_bonds_investment_return_rates() -> None:
 
 def test_when_applying_inflation_rate_to_monthly_expenses() -> None:
     init = FireSimulation(
-        stock_investments=0,
-        bonds_investments=0,
+        stock_investments=Decimal("0"),
+        bonds_investments=Decimal("0"),
         investment_properties=[],
-        cash=11_000,
-        stock_return_rate=0,
-        bonds_return_rate=0,
-        monthly_expenses=11_000,
-        monthly_income=0,
-        annual_inflation_rate=0.03,
+        cash=Decimal("11_000"),
+        stock_return_rate=Decimal("0"),
+        bonds_return_rate=Decimal("0"),
+        monthly_expenses=Decimal("11_000"),
+        monthly_income=Decimal("0"),
+        annual_inflation_rate=Decimal("0.03"),
         date=date(2021, 1, 1),
     )
 
@@ -443,7 +445,7 @@ def test_when_applying_inflation_rate_to_monthly_expenses() -> None:
         "bonds_return_rate": 0,
         "monthly_expenses": 11_027.5,
         "monthly_income": 0,
-        "annual_inflation_rate": 0.03,
+        "annual_inflation_rate": Decimal("0.03"),
         "annual_property_appreciation_rate": 0.00,
         "properties_net_cash_value": 0,
         "invest_cash_surplus": False,
@@ -455,19 +457,19 @@ def test_when_applying_inflation_rate_to_monthly_expenses() -> None:
 
 def test_that_surplus_money_is_invested() -> None:
     init = FireSimulation(
-        stock_investments=0,
-        bonds_investments=0,
+        stock_investments=Decimal("0"),
+        bonds_investments=Decimal("0"),
         investment_properties=[],
-        cash=30_000,
-        stock_return_rate=0,
-        bonds_return_rate=0,
-        monthly_expenses=10_000,
-        monthly_income=0,
-        annual_inflation_rate=0,
-        annual_property_appreciation_rate=0.01,
+        cash=Decimal("30_000"),
+        stock_return_rate=Decimal("0"),
+        bonds_return_rate=Decimal("0"),
+        monthly_expenses=Decimal("10_000"),
+        monthly_income=Decimal("0"),
+        annual_inflation_rate=Decimal("0"),
+        annual_property_appreciation_rate=Decimal("0.01"),
         invest_cash_surplus=True,
         invest_cash_surplus_strategy="80-20",
-        invest_cash_threshold=10_000,
+        invest_cash_threshold=Decimal("10_000"),
         date=date(2021, 1, 1),
     )
 
@@ -489,7 +491,7 @@ def test_that_surplus_money_is_invested() -> None:
         "monthly_expenses": 10000,
         "monthly_income": 0,
         "annual_inflation_rate": 0.00,
-        "annual_property_appreciation_rate": 0.01,
+        "annual_property_appreciation_rate": Decimal("0.01"),
         "properties_net_cash_value": 0,
         "invest_cash_surplus": True,
         "invest_cash_surplus_strategy": "80-20",
@@ -500,13 +502,13 @@ def test_that_surplus_money_is_invested() -> None:
 
 def test_simulation_when_annual_increase_happens() -> None:
     init = FireSimulation(
-        stock_investments=0,
-        bonds_investments=0,
+        stock_investments=Decimal("0"),
+        bonds_investments=Decimal("0"),
         annual_income_increase_rate=Decimal("0.01"),
         investment_properties=[],
-        cash=0,
-        stock_return_rate=0,
-        monthly_expenses=10_000,
+        cash=Decimal("0"),
+        stock_return_rate=Decimal("0"),
+        monthly_expenses=Decimal("10_000"),
         monthly_income=Decimal("10_000"),
         date=date(2020, 12, 1),
     )

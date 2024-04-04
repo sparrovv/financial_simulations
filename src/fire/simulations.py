@@ -1,10 +1,11 @@
 from dataclasses import dataclass, asdict, field, replace
 from datetime import date
-from typing import Literal, Optional
+from typing import Literal
 from .mortgage import calculate_monthly_payment
-from decimal import Decimal
+from decimal import Decimal, getcontext
 from logging import getLogger
 
+getcontext().prec = 26
 
 logger = getLogger(__name__)
 
@@ -16,8 +17,8 @@ class InvestmentProperty:
     mortgage_left: Decimal
     mortgage_rate: Decimal
     mortgage_months: int
-    monthly_interest: Optional[Decimal] = None
-    monthly_payment: Optional[Decimal] = None
+    monthly_interest: Decimal = Decimal("0")
+    monthly_payment: Decimal = Decimal("0")
 
     def is_with_mortgage(self) -> bool:
         return self.mortgage_left > 0
@@ -45,21 +46,15 @@ def simulate_next_property_month(
 ) -> InvestmentProperty:
     new_market_value = round(
         prev.market_value
-        + (prev.market_value * annual_property_appreciation_rate / Decimal(12)),
+        + (prev.market_value * annual_property_appreciation_rate / Decimal("12")),
         2,
     )
 
     if prev.is_with_mortgage() is False:
         return replace(prev, market_value=new_market_value)
 
-    # monthly_payment, monthly_interest = calculate_monthly_payment(
-    #     principal=prev.mortgage_left,
-    #     rate=prev.mortgage_rate,
-    #     number_of_months_left=prev.mortgage_months,
-    # )
-
     # calculate the principal
-    monthly_principal = (prev.monthly_payment or 0) - (prev.monthly_interest or 0)
+    monthly_principal = prev.monthly_payment - prev.monthly_interest
 
     new_mortgage_left = prev.mortgage_left - monthly_principal
     new_mortgage_months = prev.mortgage_months - 1
@@ -75,45 +70,45 @@ def simulate_next_property_month(
 
 @dataclass
 class FireSimulation:
-    stock_investments: float
-    bonds_investments: float
+    stock_investments: Decimal
+    bonds_investments: Decimal
 
-    cash: float
-    monthly_expenses: float
+    cash: Decimal
+    monthly_expenses: Decimal
     monthly_income: Decimal
     date: date
-    stock_return_rate: float
+    stock_return_rate: Decimal
 
     investment_properties: list[InvestmentProperty] = field(default_factory=list)
-    bonds_return_rate: float = 0
+    bonds_return_rate: Decimal = Decimal(0)
 
-    annual_inflation_rate: float = 0
+    annual_inflation_rate: Decimal = Decimal(0)
     annual_income_increase_rate: Decimal = Decimal(0)
     # this should be more or less the same as the inflation rate
     annual_property_appreciation_rate: Decimal = Decimal(0)
     invest_cash_surplus: bool = False
     # this says what's the threshold over which the cash should be invested based on the strategy
-    invest_cash_threshold: float = 0
+    invest_cash_threshold: Decimal = Decimal(0)
     invest_cash_surplus_strategy: Literal["80-20", "100", "60-40", "50-50"] = "80-20"
 
     @property
-    def properties_market_value(self) -> float:
-        return sum([float(p.market_value) for p in self.investment_properties])
+    def properties_market_value(self) -> Decimal:
+        return sum([p.market_value for p in self.investment_properties])
 
     @property
-    def properties_monthly_income(self) -> float:
-        return sum([float(p.monthly_income) for p in self.investment_properties])
+    def properties_monthly_income(self) -> Decimal:
+        return sum([p.monthly_income for p in self.investment_properties])
 
     @property
-    def properties_net_cash_value(self) -> float:
-        return sum([float(p.net_cash_value()) for p in self.investment_properties])
+    def properties_net_cash_value(self) -> Decimal:
+        return sum([p.net_cash_value() for p in self.investment_properties])
 
     @property
-    def liquid_wealth(self) -> float:
+    def liquid_wealth(self) -> Decimal:
         return self.stock_investments + self.bonds_investments + self.cash
 
     @property
-    def wealth_inc_properties(self) -> float:
+    def wealth_inc_properties(self) -> Decimal:
         return (
             self.stock_investments
             + self.bonds_investments
@@ -122,7 +117,7 @@ class FireSimulation:
         )
 
     @property
-    def properties_monthly_mortgage(self) -> float:
+    def properties_monthly_mortgage(self) -> Decimal:
         return sum(
             [
                 p.monthly_payment
@@ -168,7 +163,7 @@ def simulate_next(prev: FireSimulation) -> FireSimulation:
 
     # total expenses should include inflation rate
     total_monthly_expenses = prev.monthly_expenses * (
-        1 + prev.annual_inflation_rate / 12
+        1 + prev.annual_inflation_rate / Decimal("12")
     )
     # we have annula income increase rate, so we should increase the monthly income once a year
     # we could increase it monthly, but in reality it's more likely to increase once a year, so we'll do that
@@ -180,38 +175,34 @@ def simulate_next(prev: FireSimulation) -> FireSimulation:
         )
 
     # total income
-    total_monthly_cash = (
-        prev.cash + float(new_monthly_income) + prev.properties_monthly_income
-    )
+    total_monthly_cash = prev.cash + new_monthly_income + prev.properties_monthly_income
 
     new_properties_net_cash_value = sum(
-        [float(p.net_cash_value()) for p in new_investment_properties]
+        [p.net_cash_value() for p in new_investment_properties]
     )
 
-    new_bonds_investments = round(
-        prev.bonds_investments + (prev.bonds_investments * prev.bonds_return_rate / 12),
-        2,
+    new_bonds_investments = prev.bonds_investments + (
+        prev.bonds_investments * prev.bonds_return_rate / Decimal("12")
     )
     # if there are any stock investments, calculate the return rate and add it to the stock investments
-    new_stock_investments = round(
-        prev.stock_investments + (prev.stock_investments * prev.stock_return_rate / 12),
-        2,
+    new_stock_investments = prev.stock_investments + (
+        prev.stock_investments * prev.stock_return_rate / Decimal("12")
     )
 
     if total_monthly_cash > total_monthly_expenses:
         new_cash = total_monthly_cash - total_monthly_expenses
     elif (total_monthly_cash + new_bonds_investments) > total_monthly_expenses:
-        new_cash = 0
+        new_cash = Decimal("0")
         cash_needed = total_monthly_expenses - total_monthly_cash
         new_bonds_investments -= cash_needed
     elif (
         total_monthly_cash + new_bonds_investments + new_stock_investments
     ) > total_monthly_expenses:
-        new_cash = 0
+        new_cash = Decimal("0")
         cash_needed = (
             total_monthly_expenses - total_monthly_cash - new_bonds_investments
         )
-        new_bonds_investments = 0
+        new_bonds_investments = Decimal("0")
         new_stock_investments -= cash_needed
     elif (
         total_monthly_cash
@@ -228,8 +219,8 @@ def simulate_next(prev: FireSimulation) -> FireSimulation:
         )
         new_investment_properties.remove(to_delete_property)
 
-        new_cash = 0
-        new_cash += float(to_delete_property.net_cash_value())
+        new_cash = Decimal("0")
+        new_cash += to_delete_property.net_cash_value()
 
         cash_needed = (
             total_monthly_expenses
@@ -237,8 +228,8 @@ def simulate_next(prev: FireSimulation) -> FireSimulation:
             - new_stock_investments
             - new_bonds_investments
         )
-        new_stock_investments = 0
-        new_bonds_investments = 0
+        new_stock_investments = Decimal("0")
+        new_stock_investments = Decimal("0")
         new_cash -= cash_needed
     else:
         cash_needed = (
@@ -247,8 +238,8 @@ def simulate_next(prev: FireSimulation) -> FireSimulation:
             - new_stock_investments
             - new_bonds_investments
         )
-        new_stock_investments = 0
-        new_bonds_investments = 0
+        new_bonds_investments = Decimal("0")
+        new_stock_investments = Decimal("0")
         new_cash = -cash_needed
 
     # if there's a surplus of cash, we should invest it
@@ -257,23 +248,23 @@ def simulate_next(prev: FireSimulation) -> FireSimulation:
 
         if amount_over_threshold > 0:
             if prev.invest_cash_surplus_strategy == "80-20":
-                new_stock_investments += amount_over_threshold * 0.8
-                new_bonds_investments += amount_over_threshold * 0.2
+                new_stock_investments += amount_over_threshold * Decimal("0.8")
+                new_bonds_investments += amount_over_threshold * Decimal("0.2")
             elif prev.invest_cash_surplus_strategy == "100":
                 new_stock_investments += amount_over_threshold
             elif prev.invest_cash_surplus_strategy == "60-40":
-                new_stock_investments += amount_over_threshold * 0.6
-                new_bonds_investments += amount_over_threshold * 0.4
+                new_stock_investments += amount_over_threshold * Decimal("0.6")
+                new_bonds_investments += amount_over_threshold * Decimal("0.4")
             elif prev.invest_cash_surplus_strategy == "50-50":
-                new_stock_investments += amount_over_threshold * 0.5
-                new_bonds_investments += amount_over_threshold * 0.5
+                new_stock_investments += amount_over_threshold * Decimal("0.5")
+                new_bonds_investments += amount_over_threshold * Decimal("0.5")
 
             new_cash -= amount_over_threshold
 
     return FireSimulation(
-        stock_investments=new_stock_investments,
+        stock_investments=round(new_stock_investments, 2),
         investment_properties=new_investment_properties,
-        bonds_investments=new_bonds_investments,
+        bonds_investments=round(new_bonds_investments, 2),
         cash=new_cash,
         stock_return_rate=prev.stock_return_rate,
         bonds_return_rate=prev.bonds_return_rate,
