@@ -29,3 +29,7 @@ Things to do:
 - Simulate the stock market rate of returns based on some historical data
 - Simulate the inflation rate based on some historical data
 - Add more visualizations
+
+## streamlit
+
+https://finsim.streamlit.app/

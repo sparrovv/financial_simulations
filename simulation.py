@@ -57,8 +57,9 @@ for i in range(number_of_investment_properties):
 st.subheader("Configure parameters:")
 
 annual_inflation_rate = st.slider("inflation_rate", 0.0, 0.2, 0.04)
-return_rate_from_investment = st.slider("return_rate_from_stock", 0.0, 0.2, 0.05)
-return_rate_from_bonds = st.slider("return_rate_from_bonds", 0.0, 0.2, 0.04)
+stock_return_rate = st.slider("return_rate_from_stock", 0.0, 0.2, 0.05)
+bonds_return_rate = st.slider("bonds_return_rate", 0.0, 0.2, 0.04)
+annual_income_increase_rate = st.slider("annual_income_increase_rate", 0.0, 0.2, 0.03)
 invest_cash_surplus = st.checkbox("Invest cash surplus", value=True)
 invest_cash_threshold = st.slider("Invest cash threshold", 0, 100_000, 50_000)
 
@@ -69,9 +70,10 @@ init = FireSimulation(
     monthly_income=monthly_income,
     monthly_expenses=monthly_expenses,
     investment_properties=investment_properties,
-    return_rate_from_investment=return_rate_from_investment,
-    return_rate_from_bonds=return_rate_from_bonds,
+    stock_return_rate=stock_return_rate,
+    bonds_return_rate=bonds_return_rate,
     annual_inflation_rate=annual_inflation_rate,
+    annual_income_increase_rate=Decimal(str(annual_income_increase_rate)),
     annual_property_appreciation_rate=Decimal("0.02"),
     invest_cash_surplus=invest_cash_surplus,
     invest_cash_threshold=invest_cash_threshold,

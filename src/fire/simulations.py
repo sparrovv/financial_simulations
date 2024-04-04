@@ -80,13 +80,15 @@ class FireSimulation:
 
     cash: float
     monthly_expenses: float
-    monthly_income: float
+    monthly_income: Decimal
     date: date
-    return_rate_from_investment: float
+    stock_return_rate: float
 
     investment_properties: list[InvestmentProperty] = field(default_factory=list)
-    return_rate_from_bonds: float = 0
+    bonds_return_rate: float = 0
+
     annual_inflation_rate: float = 0
+    annual_income_increase_rate: Decimal = Decimal(0)
     # this should be more or less the same as the inflation rate
     annual_property_appreciation_rate: Decimal = Decimal(0)
     invest_cash_surplus: bool = False
@@ -168,10 +170,18 @@ def simulate_next(prev: FireSimulation) -> FireSimulation:
     total_monthly_expenses = prev.monthly_expenses * (
         1 + prev.annual_inflation_rate / 12
     )
+    # we have annula income increase rate, so we should increase the monthly income once a year
+    # we could increase it monthly, but in reality it's more likely to increase once a year, so we'll do that
+    # if prev.date.month == 1:
+    new_monthly_income = prev.monthly_income
+    if new_date.month == 1:
+        new_monthly_income = prev.monthly_income * (
+            1 + prev.annual_income_increase_rate
+        )
 
     # total income
     total_monthly_cash = (
-        prev.cash + prev.monthly_income + prev.properties_monthly_income
+        prev.cash + float(new_monthly_income) + prev.properties_monthly_income
     )
 
     new_properties_net_cash_value = sum(
@@ -179,14 +189,12 @@ def simulate_next(prev: FireSimulation) -> FireSimulation:
     )
 
     new_bonds_investments = round(
-        prev.bonds_investments
-        + (prev.bonds_investments * prev.return_rate_from_bonds / 12),
+        prev.bonds_investments + (prev.bonds_investments * prev.bonds_return_rate / 12),
         2,
     )
     # if there are any stock investments, calculate the return rate and add it to the stock investments
     new_stock_investments = round(
-        prev.stock_investments
-        + (prev.stock_investments * prev.return_rate_from_investment / 12),
+        prev.stock_investments + (prev.stock_investments * prev.stock_return_rate / 12),
         2,
     )
 
@@ -267,14 +275,15 @@ def simulate_next(prev: FireSimulation) -> FireSimulation:
         investment_properties=new_investment_properties,
         bonds_investments=new_bonds_investments,
         cash=new_cash,
-        return_rate_from_investment=prev.return_rate_from_investment,
-        return_rate_from_bonds=prev.return_rate_from_bonds,
+        stock_return_rate=prev.stock_return_rate,
+        bonds_return_rate=prev.bonds_return_rate,
         monthly_expenses=total_monthly_expenses,
-        monthly_income=prev.monthly_income,
+        monthly_income=new_monthly_income,
         annual_inflation_rate=prev.annual_inflation_rate,
         annual_property_appreciation_rate=prev.annual_property_appreciation_rate,
         invest_cash_surplus=prev.invest_cash_surplus,
         invest_cash_threshold=prev.invest_cash_threshold,
         invest_cash_surplus_strategy=prev.invest_cash_surplus_strategy,
+        annual_income_increase_rate=prev.annual_income_increase_rate,
         date=new_date,
     )
