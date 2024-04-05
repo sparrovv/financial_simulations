@@ -164,6 +164,37 @@ def run_simulation(init: FireSimulation, months: int) -> list[FireSimulation]:
     return simulations
 
 
+def run_fire_simulation(
+    init: FireSimulation, expected_number_of_months: int
+) -> list[FireSimulation]:
+    """
+    for expected number of months run the simulation.
+    On every month, try to zero out the income and break when the simulation reaches the expected number of months
+    """
+    final_sim = []
+
+    for i in range(expected_number_of_months):
+        simulations = [init]
+        for x in range(expected_number_of_months):
+            if x > i:
+                # update income to 0
+                prev = replace(simulations[-1], monthly_income=Decimal("0"))
+                next_sim = simulate_next(prev)
+            else:
+                next_sim = simulate_next(simulations[-1])
+
+            if next_sim.wealth_inc_properties <= 0:
+                break
+
+            simulations.append(next_sim)
+
+        if len(simulations) >= (expected_number_of_months - 2):
+            final_sim = simulations
+            break
+
+    return final_sim, i
+
+
 def simulate_next(prev: FireSimulation) -> FireSimulation:
     # add one month to the start date, year should change if month is 12
 
