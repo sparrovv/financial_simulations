@@ -63,20 +63,34 @@ annual_income_increase_rate = st.slider("annual_income_increase_rate", 0.0, 0.2,
 invest_cash_surplus = st.checkbox("Invest cash surplus", value=True)
 invest_cash_threshold = st.slider("Invest cash threshold", 0, 100_000, 50_000)
 
+
+def to_d(v: float) -> Decimal:
+    return Decimal(str(v))
+
+
 init = FireSimulation(
-    stock_investments=stock_investment,
-    bonds_investments=bond_investment,
-    cash=cash,
-    monthly_income=monthly_income,
-    monthly_expenses=monthly_expenses,
-    investment_properties=investment_properties,
-    stock_return_rate=stock_return_rate,
-    bonds_return_rate=bonds_return_rate,
-    annual_inflation_rate=annual_inflation_rate,
-    annual_income_increase_rate=Decimal(str(annual_income_increase_rate)),
-    annual_property_appreciation_rate=Decimal("0.02"),
+    stock_investments=to_d(stock_investment),
+    bonds_investments=to_d(bond_investment),
+    cash=to_d(cash),
+    monthly_income=to_d(monthly_income),
+    monthly_expenses=to_d(monthly_expenses),
+    investment_properties=[
+        InvestmentProperty(
+            market_value=to_d(i.market_value),
+            mortgage_left=to_d(i.mortgage_left),
+            mortgage_months=i.mortgage_months,
+            monthly_income=to_d(i.monthly_income),
+            mortgage_rate=to_d(i.mortgage_rate),
+        )
+        for i in investment_properties
+    ],
+    stock_return_rate=to_d(stock_return_rate),
+    bonds_return_rate=to_d(bonds_return_rate),
+    annual_inflation_rate=to_d(annual_inflation_rate),
+    annual_income_increase_rate=to_d(annual_income_increase_rate),
+    annual_property_appreciation_rate=to_d("0.02"),
     invest_cash_surplus=invest_cash_surplus,
-    invest_cash_threshold=invest_cash_threshold,
+    invest_cash_threshold=to_d(invest_cash_threshold),
     invest_cash_surplus_strategy="80-20",
     date=datetime.datetime.fromisoformat("2024-03-01"),
 )
@@ -94,7 +108,7 @@ st.subheader("The wealth graph")
 
 fig = px.bar(
     df,
-    x="date",
+    x=df["date"],
     y=[
         "properties_net_cash_value",
         "stock_investments",
@@ -103,18 +117,18 @@ fig = px.bar(
     ],
     title="Wealth over time",
 )
-fig.add_scatter(
-    x=df["date"], y=df["monthly_expenses"], mode="lines", name="Monthly expenses"
-)
-fig.add_scatter(
-    x=df["date"], y=df["monthly_income"], mode="lines", name="Monthly income"
-)
-fig.add_scatter(
-    x=df["date"],
-    y=df["wealth_inc_properties"],
-    mode="lines",
-    name="Wealth with net properties",
-)
+# fig.add_scatter(
+#     x=df["date"], y=df["monthly_expenses"], mode="lines", name="Monthly expenses"
+# )
+# fig.add_scatter(
+#     x=df["date"], y=df["monthly_income"], mode="lines", name="Monthly income"
+# )
+# fig.add_scatter(
+#     x=df["date"],
+#     y=df["wealth_inc_properties"],
+#     mode="lines",
+#     name="Wealth with net properties",
+# )
 
 fig
 

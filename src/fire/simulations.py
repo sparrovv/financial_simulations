@@ -127,7 +127,7 @@ class FireSimulation:
         )
 
     def to_dict(self):
-        return asdict(self) | {
+        to_return = asdict(self) | {
             "liquid_wealth": self.liquid_wealth,
             "wealth_inc_properties": self.wealth_inc_properties,
             "properties_monthly_mortgage": self.properties_monthly_mortgage,
@@ -135,6 +135,11 @@ class FireSimulation:
             "properties_monthly_income": self.properties_monthly_income,
             "properties_net_cash_value": self.properties_net_cash_value,
         }
+        for k, v in to_return.items():
+            if isinstance(v, Decimal):
+                to_return[k] = float(v)
+
+        return to_return
 
 
 def run_simulation(init: FireSimulation, months: int) -> list[FireSimulation]:
@@ -265,11 +270,11 @@ def simulate_next(prev: FireSimulation) -> FireSimulation:
         stock_investments=round(new_stock_investments, 2),
         investment_properties=new_investment_properties,
         bonds_investments=round(new_bonds_investments, 2),
-        cash=new_cash,
+        cash=round(new_cash, 2),
         stock_return_rate=prev.stock_return_rate,
         bonds_return_rate=prev.bonds_return_rate,
-        monthly_expenses=total_monthly_expenses,
-        monthly_income=new_monthly_income,
+        monthly_expenses=round(total_monthly_expenses, 2),
+        monthly_income=round(new_monthly_income, 2),
         annual_inflation_rate=prev.annual_inflation_rate,
         annual_property_appreciation_rate=prev.annual_property_appreciation_rate,
         invest_cash_surplus=prev.invest_cash_surplus,
