@@ -117,18 +117,18 @@ fig = px.bar(
     ],
     title="Wealth over time",
 )
-# fig.add_scatter(
-#     x=df["date"], y=df["monthly_expenses"], mode="lines", name="Monthly expenses"
-# )
-# fig.add_scatter(
-#     x=df["date"], y=df["monthly_income"], mode="lines", name="Monthly income"
-# )
-# fig.add_scatter(
-#     x=df["date"],
-#     y=df["wealth_inc_properties"],
-#     mode="lines",
-#     name="Wealth with net properties",
-# )
+fig.add_scatter(
+    x=df["date"], y=df["monthly_expenses"], mode="lines", name="Monthly expenses"
+)
+fig.add_scatter(
+    x=df["date"], y=df["monthly_income"], mode="lines", name="Monthly income"
+)
+fig.add_scatter(
+    x=df["date"],
+    y=df["wealth_inc_properties"],
+    mode="lines",
+    name="Wealth with net properties",
+)
 
 fig
 

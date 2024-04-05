@@ -19,6 +19,7 @@ class InvestmentProperty:
     mortgage_months: int
     monthly_interest: Decimal = Decimal("0")
     monthly_payment: Decimal = Decimal("0")
+    annual_rent_increase_rate: Decimal = Decimal("0")
 
     def is_with_mortgage(self) -> bool:
         return self.mortgage_left > 0
@@ -42,13 +43,17 @@ class InvestmentProperty:
 
 
 def simulate_next_property_month(
-    prev: InvestmentProperty, annual_property_appreciation_rate: Decimal
+    prev: InvestmentProperty, annual_property_appreciation_rate: Decimal, sim_date: date
 ) -> InvestmentProperty:
     new_market_value = round(
         prev.market_value
         + (prev.market_value * annual_property_appreciation_rate / Decimal("12")),
         2,
     )
+
+    new_monthly_income = prev.monthly_income
+    if sim_date.month == 1:
+        new_monthly_income = prev.monthly_income * (1 + prev.annual_rent_increase_rate)
 
     if prev.is_with_mortgage() is False:
         return replace(prev, market_value=new_market_value)
@@ -61,10 +66,11 @@ def simulate_next_property_month(
 
     return InvestmentProperty(
         market_value=new_market_value,
-        monthly_income=prev.monthly_income,
+        monthly_income=new_monthly_income,
         mortgage_left=new_mortgage_left,
         mortgage_rate=prev.mortgage_rate,
         mortgage_months=new_mortgage_months,
+        annual_rent_increase_rate=prev.annual_rent_increase_rate,
     )
 
 
@@ -104,6 +110,10 @@ class FireSimulation:
         return sum([p.net_cash_value() for p in self.investment_properties])
 
     @property
+    def properties_mortgage_left(self) -> Decimal:
+        return sum([p.mortgage_left for p in self.investment_properties])
+
+    @property
     def liquid_wealth(self) -> Decimal:
         return self.stock_investments + self.bonds_investments + self.cash
 
@@ -134,6 +144,7 @@ class FireSimulation:
             "properties_market_value": self.properties_market_value,
             "properties_monthly_income": self.properties_monthly_income,
             "properties_net_cash_value": self.properties_net_cash_value,
+            "properties_mortgage_left": self.properties_mortgage_left,
         }
         for k, v in to_return.items():
             if isinstance(v, Decimal):
@@ -162,7 +173,9 @@ def simulate_next(prev: FireSimulation) -> FireSimulation:
     )
 
     new_investment_properties = [
-        simulate_next_property_month(prop, prev.annual_property_appreciation_rate)
+        simulate_next_property_month(
+            prop, prev.annual_property_appreciation_rate, sim_date=new_date
+        )
         for prop in prev.investment_properties
     ]
 

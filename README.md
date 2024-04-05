@@ -33,3 +33,11 @@ Things to do:
 ## streamlit
 
 https://finsim.streamlit.app/
+
+## tests
+
+```
+pipx install nox
+
+nox
+```

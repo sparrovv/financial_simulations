@@ -42,6 +42,7 @@ def test_simulation_when_enough_not_enough_cash() -> None:
         "properties_monthly_income": 0,
         "properties_net_cash_value": 0,
         "liquid_wealth": 9000.0,
+        "properties_mortgage_left": 0,
         "date": date(2021, 2, 1),
     }
 
@@ -81,6 +82,7 @@ def test_simulation_when_enough_cash_and_stock_and_bonds() -> None:
         "invest_cash_surplus_strategy": "80-20",
         "invest_cash_threshold": 0,
         "properties_net_cash_value": 0,
+        "properties_mortgage_left": 0,
         "date": date(2021, 2, 1),
     }
 
@@ -120,6 +122,7 @@ def test_simulation_when_not_enough_cash_and_stock() -> None:
         "invest_cash_surplus_strategy": "80-20",
         "invest_cash_threshold": 0,
         "properties_net_cash_value": 0,
+        "properties_mortgage_left": 0,
         "date": date(2021, 2, 1),
     }
 
@@ -158,6 +161,7 @@ def test_when_monthly_income_is_present() -> None:
         "invest_cash_surplus_strategy": "80-20",
         "invest_cash_threshold": 0,
         "properties_net_cash_value": 0,
+        "properties_mortgage_left": 0,
         "annual_income_increase_rate": 0,
         "date": date(2021, 2, 1),
     }
@@ -200,23 +204,25 @@ def test_when_monthly_income_from_properties_without_mortgage_is_present() -> No
                 "monthly_income": Decimal(2_000),
                 "monthly_interest": 0,
                 "monthly_payment": 0,
+                "annual_rent_increase_rate": Decimal("0.0"),
             }
         ],
         "stock_return_rate": 0,
         "annual_income_increase_rate": 0,
         "liquid_wealth": 1000,
-        "wealth_inc_properties": Decimal("101833.33"),
+        "wealth_inc_properties": 101833.33,
         "properties_monthly_mortgage": 0,
-        "properties_market_value": Decimal("100833.33"),
-        "properties_net_cash_value": Decimal("100833.33"),
+        "properties_market_value": 100833.33,
+        "properties_net_cash_value": 100833.33,
         "monthly_expenses": 11_000,
         "monthly_income": 0,
         "bonds_return_rate": 0,
         "annual_inflation_rate": 0,
-        "annual_property_appreciation_rate": Decimal("0.1"),
+        "annual_property_appreciation_rate": 0.1,
         "invest_cash_surplus": False,
         "invest_cash_surplus_strategy": "80-20",
         "invest_cash_threshold": 0,
+        "properties_mortgage_left": 0,
         "date": date(2021, 2, 1),
     }
 
@@ -260,20 +266,22 @@ def test_when_monthly_income_from_properties_with_mortgage_is_present() -> None:
                 "monthly_income": Decimal(2_000),
                 "monthly_interest": Decimal("827.96"),
                 "monthly_payment": Decimal("1477.81"),
+                "annual_rent_increase_rate": Decimal("0.0"),
             }
         ],
         "stock_return_rate": 0,
         "annual_income_increase_rate": 0,
         "liquid_wealth": 1000,
-        "wealth_inc_properties": Decimal("2477.81"),
-        "properties_monthly_mortgage": Decimal("1477.81"),
-        "properties_market_value": Decimal("100833.33"),
-        "properties_net_cash_value": Decimal("1477.81"),
+        "wealth_inc_properties": 2477.81,
+        "properties_monthly_mortgage": 1477.81,
+        "properties_market_value": 100833.33,
+        "properties_net_cash_value": 1477.81,
         "monthly_expenses": 11_000,
         "monthly_income": 0,
         "bonds_return_rate": 0,
         "annual_inflation_rate": 0,
-        "annual_property_appreciation_rate": Decimal("0.1"),
+        "annual_property_appreciation_rate": 0.1,
+        "properties_mortgage_left": 99355.52,
         "invest_cash_surplus": False,
         "invest_cash_surplus_strategy": "80-20",
         "invest_cash_threshold": 0,
@@ -329,6 +337,7 @@ def test_when_monthly_income_from_properties_with_mortgage_is_present_and_need_t
         "invest_cash_surplus": False,
         "invest_cash_surplus_strategy": "80-20",
         "invest_cash_threshold": 0,
+        "properties_mortgage_left": 0,
         "date": date(2021, 2, 1),
     }
 
@@ -350,17 +359,17 @@ def test_when_applying_stock_investment_return_rates() -> None:
     next_sim = simulate_next(init)
 
     assert next_sim.to_dict() == {
-        "stock_investments": Decimal("100_416.67"),
+        "stock_investments": 100_416.67,
         "bonds_investments": 0,
         "annual_income_increase_rate": 0,
         "properties_market_value": 0,
         "properties_monthly_income": 0,
         "cash": 0,
         "investment_properties": [],
-        "liquid_wealth": Decimal("100416.67"),
+        "liquid_wealth": 100416.67,
         "properties_monthly_mortgage": 0,
-        "wealth_inc_properties": Decimal("100416.67"),
-        "stock_return_rate": Decimal("0.05"),
+        "wealth_inc_properties": 100416.67,
+        "stock_return_rate": 0.05,
         "monthly_expenses": 11_000,
         "monthly_income": 0,
         "bonds_return_rate": 0,
@@ -370,6 +379,7 @@ def test_when_applying_stock_investment_return_rates() -> None:
         "invest_cash_surplus": False,
         "invest_cash_surplus_strategy": "80-20",
         "invest_cash_threshold": 0,
+        "properties_mortgage_left": 0,
         "date": date(2021, 2, 1),
     }
 
@@ -401,7 +411,7 @@ def test_when_applying_bonds_investment_return_rates() -> None:
         "properties_monthly_mortgage": 0,
         "wealth_inc_properties": 100250.0,
         "stock_return_rate": 0,
-        "bonds_return_rate": Decimal("0.03"),
+        "bonds_return_rate": 0.03,
         "monthly_expenses": 11_000,
         "monthly_income": 0,
         "annual_inflation_rate": 0,
@@ -410,6 +420,7 @@ def test_when_applying_bonds_investment_return_rates() -> None:
         "invest_cash_surplus": False,
         "invest_cash_surplus_strategy": "80-20",
         "invest_cash_threshold": 0,
+        "properties_mortgage_left": 0,
         "date": date(2021, 2, 1),
     }
 
@@ -445,12 +456,13 @@ def test_when_applying_inflation_rate_to_monthly_expenses() -> None:
         "bonds_return_rate": 0,
         "monthly_expenses": 11_027.5,
         "monthly_income": 0,
-        "annual_inflation_rate": Decimal("0.03"),
+        "annual_inflation_rate": 0.03,
         "annual_property_appreciation_rate": 0.00,
         "properties_net_cash_value": 0,
         "invest_cash_surplus": False,
         "invest_cash_surplus_strategy": "80-20",
         "invest_cash_threshold": 0,
+        "properties_mortgage_left": 0,
         "date": date(2021, 2, 1),
     }
 
@@ -491,8 +503,9 @@ def test_that_surplus_money_is_invested() -> None:
         "monthly_expenses": 10000,
         "monthly_income": 0,
         "annual_inflation_rate": 0.00,
-        "annual_property_appreciation_rate": Decimal("0.01"),
+        "annual_property_appreciation_rate": 0.01,
         "properties_net_cash_value": 0,
+        "properties_mortgage_left": 0,
         "invest_cash_surplus": True,
         "invest_cash_surplus_strategy": "80-20",
         "invest_cash_threshold": 10_000,
@@ -524,8 +537,8 @@ def test_simulation_when_annual_increase_happens() -> None:
         "investment_properties": [],
         "cash": 100,
         "monthly_expenses": 10_000,
-        "annual_income_increase_rate": Decimal("0.01"),
-        "monthly_income": Decimal("10_100"),
+        "annual_income_increase_rate": 0.01,
+        "monthly_income": 10_100,
         "stock_return_rate": 0,
         "bonds_return_rate": 0,
         "annual_inflation_rate": 0,
@@ -536,5 +549,6 @@ def test_simulation_when_annual_increase_happens() -> None:
         "properties_market_value": 0,
         "properties_monthly_income": 0,
         "properties_net_cash_value": 0,
+        "properties_mortgage_left": 0,
         "date": date(2021, 1, 1),
     }
