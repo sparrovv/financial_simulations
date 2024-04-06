@@ -3,19 +3,26 @@ from pathlib import Path
 import streamlit as st
 import pandas as pd
 import datetime
-import plotly.express as px
+from datetime import timedelta
 from decimal import Decimal
+
 
 project_root = Path.cwd()
 src_path = project_root / "src"
 
 sys.path.append(str(src_path))
 
-from fire.simulations import FireSimulation, run_simulation, InvestmentProperty
+from fire.simulations import FireSimulation, run_fire_simulation, InvestmentProperty
 
 
 with st.sidebar:
-    years = st.slider("how_many_years_to_simulate", 0, 30, 15)
+    current_age = st.slider("How old are you?", 0, 100, 38)
+    expected_age = st.slider("Life expectancy?", 0, 100, 85)
+    years = expected_age - current_age
+    f"Simulating for {years} years"
+
+    date_of_death = datetime.datetime.now() + timedelta(days=years * 365)
+    expected_number_of_months = years * 12
 
     st.subheader("Provide monthly income and expenses:")
     monthly_income = st.slider("income", 0, 100_000, 10_000)
@@ -66,12 +73,27 @@ with st.sidebar:
         "annual_income_increase_rate", 0.0, 0.2, 0.03
     )
     invest_cash_surplus = st.checkbox("Invest cash surplus", value=True)
+    invest_cash_surplus_strategy = st.selectbox(
+        "Invest cash surplus strategy", ["50-50", "60-40", "80-20"], index=1
+    )
+
     invest_cash_threshold = st.slider("Invest cash threshold", 0, 100_000, 50_000)
 
 
 with st.container(border=False):
 
-    st.title("Simulate your savings and wealth growth over time")
+    st.title("When can I stop working? FIRE simulation!")
+
+    """
+    **This is a simple simulation of the FIRE (Financial Independence, Retire Early) concept.**
+
+    Configure your current financial situation.
+    What's the monthly income and expenses. 
+    How much do you have in stocks, bonds, and cash.
+
+    Add any investment properties.
+
+    """
 
     def to_d(v: float) -> Decimal:
         return Decimal(str(v))
@@ -99,22 +121,34 @@ with st.container(border=False):
         annual_property_appreciation_rate=to_d("0.02"),
         invest_cash_surplus=invest_cash_surplus,
         invest_cash_threshold=to_d(invest_cash_threshold),
-        invest_cash_surplus_strategy="80-20",
+        invest_cash_surplus_strategy=invest_cash_surplus_strategy,
         date=datetime.datetime.fromisoformat("2024-03-01"),
     )
 
     # simulate for next X years
-    simulation = run_simulation(init, years * 12)
+    # simulation = run_simulation(init, years * 12)
+    simulation, nmb_of_sims = run_fire_simulation(
+        init, expected_number_of_months=expected_number_of_months
+    )
+    if len(simulation) < 2:
+        st.error("No simulation data")
+        st.stop()
 
     df = pd.DataFrame([s.to_dict() for s in simulation])
     # set date as an index
     df.set_index("date", inplace=True)
 
-    st.subheader("Granular data")
+    first_month_with_zero_income = df[df["monthly_income"] == 0]
+    # check if there is a month with zero income
+    if not first_month_with_zero_income.empty:
+        years_to_retire = (
+            first_month_with_zero_income.index[0].year - datetime.datetime.now().year
+        )
+        st.subheader(
+            f"Retire in {years_to_retire} years, {first_month_with_zero_income.index[0].strftime('%B %Y')}"
+        )
 
-    df
-
-    st.subheader("The wealth graph")
+    st.subheader("FIRE curve - for how long you will need to work?")
 
     st.bar_chart(
         df[
@@ -127,4 +161,8 @@ with st.container(border=False):
         ]
     )
 
-    st.scatter_chart(df[["monthly_expenses", "monthly_income"]])
+    st.subheader("Granular data")
+
+    df
+
+    # st.scatter_chart(df[["monthly_expenses", "monthly_income"]])

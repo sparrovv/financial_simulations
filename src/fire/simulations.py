@@ -172,8 +172,10 @@ def run_fire_simulation(
     On every month, try to zero out the income and break when the simulation reaches the expected number of months
     """
     final_sim = []
+    n = 0
 
     for i in range(expected_number_of_months):
+        n += 1
         simulations = [init]
         for x in range(expected_number_of_months):
             if x > i:
@@ -188,11 +190,11 @@ def run_fire_simulation(
 
             simulations.append(next_sim)
 
+        final_sim = simulations
         if len(simulations) >= (expected_number_of_months - 2):
-            final_sim = simulations
             break
 
-    return final_sim, i
+    return final_sim, n
 
 
 def simulate_next(prev: FireSimulation) -> FireSimulation:
