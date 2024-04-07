@@ -94,10 +94,9 @@ with st.container(border=False):
 
     """
     **This is a simple simulation of the FIRE (Financial Independence, Retire Early) concept.**
-    The simulation will calculate how long you need to work to retire early and live from your investments.
+    The simulation will calculate how long you need to work to retire early and live from your investments, given you invest the surplus of the cash.
 
     Configure your current financial situation, that includes:
-
     - the monthly income, net of taxes, the monthly expenses
     - current investments, like: stocks, bonds, and cash.
     - investment properties, if you have any.
@@ -159,7 +158,9 @@ with st.container(border=False):
         )
         "From that month your income will be zero, and you will live from your investments."
     else:
-        st.subheader("Doesn't seem you can retire early. Keep working!")
+        st.subheader(
+            "With current configuration, you will always need some kind of income stream."
+        )
 
     st.subheader("FIRE curve - for how long you will need to work?")
 
