@@ -12,10 +12,13 @@ src_path = project_root / "src"
 
 sys.path.append(str(src_path))
 
+from conf import get_ranges
 from fire.simulations import FireSimulation, run_fire_simulation, InvestmentProperty
 
-
 with st.sidebar:
+    currency_code = st.selectbox("Select currency code", ["USD", "PLN", "EUR"], index=0)
+    r = get_ranges(currency_code)
+
     current_age = st.slider("How old are you?", 0, 100, 38)
     expected_age = st.slider("Life expectancy?", 0, 100, 85)
     years = expected_age - current_age
@@ -25,13 +28,13 @@ with st.sidebar:
     expected_number_of_months = years * 12
 
     st.subheader("Provide monthly income and expenses:")
-    monthly_income = st.slider("income", 0, 100_000, 10_000)
-    monthly_expenses = st.slider("monthly_expenses", 0, 100_000, 10_000)
+    monthly_income = st.slider("income", *r["monthly_income"])
+    monthly_expenses = st.slider("monthly_expenses", *r["monthly_expenses"])
 
     st.subheader("Provide basic savings and expenses information:")
-    stock_investment = st.slider("stock_investment", 0, 10_00_000, 100_000)
-    bond_investment = st.slider("bond_investment", 0, 10_00_000, 100_000)
-    cash = st.slider("cash", 0, 10_00_000, 50_000)
+    stock_investment = st.slider("stock_investment", *r["stock_investment"])
+    bond_investment = st.slider("bond_investment", *r["bond_investment"])
+    cash = st.slider("cash", *r["cash"])
 
     st.subheader("Any investment properties?")
 
@@ -43,12 +46,12 @@ with st.sidebar:
 
     for i in range(number_of_investment_properties):
         st.subheader(f"Property {i+1}")
-        market_value = st.slider(f"market_value_{i+1}", 0, 3_000_000, 500_000)
-        mortgage_left = st.slider(f"mortgage_left_{i+1}", 0, 3_000_000, 500_000)
-        mortgage_months = st.slider(f"mortgage_months_{i+1}", 0, 360, 360)
-        mortgage_rate = st.slider(f"mortgage_rate_{i+1}", 0.1, 20.0, 7.66)
+        market_value = st.slider(f"market_value_{i+1}", *r["market_value"])
+        mortgage_left = st.slider(f"mortgage_left_{i+1}", *r["mortgage_left"])
+        mortgage_months = st.slider(f"mortgage_months_{i+1}", *r["mortgage_months"])
+        mortgage_rate = st.slider(f"mortgage_rate_{i+1}", *r["mortgage_rate"])
         property_monthly_income = st.slider(
-            f"property_monthly_income_{i+1}", 0, 10_000, 2500
+            f"property_monthly_income_{i+1}", *r["properties_monthly_income"]
         )
         annual_rent_increase_rate = st.slider(
             f"annual_rent_increase_rate_{i+1}", 0.01, 0.1, 0.01
@@ -72,26 +75,36 @@ with st.sidebar:
     annual_income_increase_rate = st.slider(
         "annual_income_increase_rate", 0.0, 0.2, 0.03
     )
+    annual_property_appreciation_rate = st.slider(
+        "annual_property_appreciation_rate", 0.0, 0.1, 0.02
+    )
     invest_cash_surplus = st.checkbox("Invest cash surplus", value=True)
     invest_cash_surplus_strategy = st.selectbox(
         "Invest cash surplus strategy", ["50-50", "60-40", "80-20"], index=1
     )
 
-    invest_cash_threshold = st.slider("Invest cash threshold", 0, 100_000, 50_000)
+    invest_cash_threshold = st.slider(
+        "Invest cash threshold", *r["invest_cash_threshold"]
+    )
 
 
 with st.container(border=False):
 
-    st.title("When can I stop working? FIRE simulation!")
+    st.title("When can I stop working?")
 
     """
     **This is a simple simulation of the FIRE (Financial Independence, Retire Early) concept.**
+    The simulation will calculate how long you need to work to retire early and live from your investments.
 
-    Configure your current financial situation.
-    What's the monthly income and expenses. 
-    How much do you have in stocks, bonds, and cash.
+    Configure your current financial situation, that includes:
 
-    Add any investment properties.
+    - the monthly income, net of taxes, the monthly expenses
+    - current investments, like: stocks, bonds, and cash.
+    - investment properties, if you have any.
+    - configure the expected return rates and inflation rate
+
+
+    **The simulation does not take into account the taxes and pension, just your actual savings**
 
     """
 
@@ -118,15 +131,13 @@ with st.container(border=False):
         bonds_return_rate=to_d(bonds_return_rate),
         annual_inflation_rate=to_d(annual_inflation_rate),
         annual_income_increase_rate=to_d(annual_income_increase_rate),
-        annual_property_appreciation_rate=to_d("0.02"),
+        annual_property_appreciation_rate=to_d(annual_property_appreciation_rate),
         invest_cash_surplus=invest_cash_surplus,
         invest_cash_threshold=to_d(invest_cash_threshold),
         invest_cash_surplus_strategy=invest_cash_surplus_strategy,
         date=datetime.datetime.fromisoformat("2024-03-01"),
     )
 
-    # simulate for next X years
-    # simulation = run_simulation(init, years * 12)
     simulation, nmb_of_sims = run_fire_simulation(
         init, expected_number_of_months=expected_number_of_months
     )
@@ -139,7 +150,6 @@ with st.container(border=False):
     df.set_index("date", inplace=True)
 
     first_month_with_zero_income = df[df["monthly_income"] == 0]
-    # check if there is a month with zero income
     if not first_month_with_zero_income.empty:
         years_to_retire = (
             first_month_with_zero_income.index[0].year - datetime.datetime.now().year
@@ -147,6 +157,9 @@ with st.container(border=False):
         st.subheader(
             f"Retire in {years_to_retire} years, {first_month_with_zero_income.index[0].strftime('%B %Y')}"
         )
+        "From that month your income will be zero, and you will live from your investments."
+    else:
+        st.subheader("Doesn't seem you can retire early. Keep working!")
 
     st.subheader("FIRE curve - for how long you will need to work?")
 
@@ -161,8 +174,6 @@ with st.container(border=False):
         ]
     )
 
-    st.subheader("Granular data")
+    st.subheader("Month by month details")
 
     df
-
-    # st.scatter_chart(df[["monthly_expenses", "monthly_income"]])
