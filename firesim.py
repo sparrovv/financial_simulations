@@ -82,9 +82,9 @@ with st.sidebar:
         annual_inflation_rate = Decimal("0.0")
     elif predefined_inflation_rate == "historical":
         inflation_gen = inflation_from_file_gen(
-            project_root / "data" / f"inflation_{currency_code}.csv"
+            project_root / "data" / f"inflation_{currency_code}.csv", monthly=True
         )
-        annual_inflation_rate = Decimal("0.0")
+        annual_inflation_rate = Decimal("1.0")
 
     stock_return_rate = st.slider("return_rate_from_stock", 0.0, 0.2, 0.05)
     bonds_return_rate = st.slider("bonds_return_rate", 0.0, 0.2, 0.04)
