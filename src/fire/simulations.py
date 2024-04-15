@@ -1,6 +1,6 @@
 from dataclasses import dataclass, asdict, field, replace
 from datetime import date
-from typing import Callable, Generator, Literal, Optional
+from typing import Generator, Literal, Optional
 from .mortgage import calculate_monthly_payment
 from decimal import Decimal, getcontext
 from logging import getLogger
@@ -8,11 +8,6 @@ from logging import getLogger
 getcontext().prec = 26
 
 logger = getLogger(__name__)
-
-
-# interface for the rate_callable
-def rate_callable(month_idx: int) -> Decimal:
-    return rate
 
 
 @dataclass
@@ -104,19 +99,19 @@ class FireSimulation:
 
     @property
     def properties_market_value(self) -> Decimal:
-        return sum([p.market_value for p in self.investment_properties])
+        return Decimal(sum([p.market_value for p in self.investment_properties]))
 
     @property
     def properties_monthly_income(self) -> Decimal:
-        return sum([p.monthly_income for p in self.investment_properties])
+        return Decimal(sum([p.monthly_income for p in self.investment_properties]))
 
     @property
     def properties_net_cash_value(self) -> Decimal:
-        return sum([p.net_cash_value() for p in self.investment_properties])
+        return Decimal(sum([p.net_cash_value() for p in self.investment_properties]))
 
     @property
     def properties_mortgage_left(self) -> Decimal:
-        return sum([p.mortgage_left for p in self.investment_properties])
+        return Decimal(sum([p.mortgage_left for p in self.investment_properties]))
 
     @property
     def liquid_wealth(self) -> Decimal:
@@ -133,12 +128,14 @@ class FireSimulation:
 
     @property
     def properties_monthly_mortgage(self) -> Decimal:
-        return sum(
-            [
-                p.monthly_payment
-                for p in self.investment_properties
-                if p.is_with_mortgage()
-            ]
+        return Decimal(
+            sum(
+                [
+                    p.monthly_payment
+                    for p in self.investment_properties
+                    if p.is_with_mortgage()
+                ]
+            )
         )
 
     def to_dict(self) -> dict:
@@ -177,16 +174,17 @@ def run_simulation(
 
 def run_fire_simulation(
     init: FireSimulation, expected_number_of_months: int
-) -> list[FireSimulation]:
+) -> tuple[list[FireSimulation], int]:
     """
-    for expected number of months run the simulation.
+    The fire simulation tries to find a point when the wealth is enough to sustain the monthly expenses for the expected number of months.
+
     On every month, try to zero out the income and break when the simulation reaches the expected number of months
     """
     final_sim = []
-    n = 0
+    number_of_months = 0
 
     for i in range(expected_number_of_months):
-        n += 1
+        number_of_months += 1
         simulations = [init]
         for x in range(expected_number_of_months):
             if x > i:
@@ -205,7 +203,7 @@ def run_fire_simulation(
         if len(simulations) >= (expected_number_of_months - 2):
             break
 
-    return final_sim, n
+    return final_sim, number_of_months
 
 
 def simulate_next(
