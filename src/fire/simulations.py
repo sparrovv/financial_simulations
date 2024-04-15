@@ -1,6 +1,6 @@
 from dataclasses import dataclass, asdict, field, replace
 from datetime import date
-from typing import Literal
+from typing import Callable, Generator, Literal, Optional
 from .mortgage import calculate_monthly_payment
 from decimal import Decimal, getcontext
 from logging import getLogger
@@ -8,6 +8,11 @@ from logging import getLogger
 getcontext().prec = 26
 
 logger = getLogger(__name__)
+
+
+# interface for the rate_callable
+def rate_callable(month_idx: int) -> Decimal:
+    return rate
 
 
 @dataclass
@@ -136,7 +141,8 @@ class FireSimulation:
             ]
         )
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
+
         to_return = asdict(self) | {
             "liquid_wealth": self.liquid_wealth,
             "wealth_inc_properties": self.wealth_inc_properties,
@@ -146,6 +152,7 @@ class FireSimulation:
             "properties_net_cash_value": self.properties_net_cash_value,
             "properties_mortgage_left": self.properties_mortgage_left,
         }
+
         for k, v in to_return.items():
             if isinstance(v, Decimal):
                 to_return[k] = float(v)
@@ -153,10 +160,14 @@ class FireSimulation:
         return to_return
 
 
-def run_simulation(init: FireSimulation, months: int) -> list[FireSimulation]:
+def run_simulation(
+    init: FireSimulation,
+    months: int,
+    inflation_rate_gen: Optional[Generator[Decimal, None, None]] = None,
+) -> list[FireSimulation]:
     simulations = [init]
     for _ in range(months):
-        next_sim = simulate_next(simulations[-1])
+        next_sim = simulate_next(simulations[-1], inflation_rate_gen=inflation_rate_gen)
         if next_sim.wealth_inc_properties < 0:
             break
 
@@ -197,7 +208,10 @@ def run_fire_simulation(
     return final_sim, n
 
 
-def simulate_next(prev: FireSimulation) -> FireSimulation:
+def simulate_next(
+    prev: FireSimulation,
+    inflation_rate_gen: Optional[Generator[Decimal, None, None]] = None,
+) -> FireSimulation:
     # add one month to the start date, year should change if month is 12
 
     new_date = prev.date.replace(
@@ -212,10 +226,14 @@ def simulate_next(prev: FireSimulation) -> FireSimulation:
         for prop in prev.investment_properties
     ]
 
+    annual_inflation_rate = prev.annual_inflation_rate
+    monthly_inflation_rate = annual_inflation_rate / Decimal("12")
+    if inflation_rate_gen:
+        monthly_inflation_rate = next(inflation_rate_gen)
+        annual_inflation_rate = monthly_inflation_rate * Decimal("12")
+
     # total expenses should include inflation rate
-    total_monthly_expenses = prev.monthly_expenses * (
-        1 + prev.annual_inflation_rate / Decimal("12")
-    )
+    total_monthly_expenses = prev.monthly_expenses * (1 + monthly_inflation_rate)
     # we have annula income increase rate, so we should increase the monthly income once a year
     # we could increase it monthly, but in reality it's more likely to increase once a year, so we'll do that
     # if prev.date.month == 1:
@@ -321,7 +339,7 @@ def simulate_next(prev: FireSimulation) -> FireSimulation:
         bonds_return_rate=prev.bonds_return_rate,
         monthly_expenses=round(total_monthly_expenses, 2),
         monthly_income=round(new_monthly_income, 2),
-        annual_inflation_rate=prev.annual_inflation_rate,
+        annual_inflation_rate=annual_inflation_rate,
         annual_property_appreciation_rate=prev.annual_property_appreciation_rate,
         invest_cash_surplus=prev.invest_cash_surplus,
         invest_cash_threshold=prev.invest_cash_threshold,
