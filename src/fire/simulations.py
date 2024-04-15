@@ -111,7 +111,9 @@ def run_simulation(
 
 
 def run_fire_simulation(
-    init: FireSimulation, expected_number_of_months: int
+    init: FireSimulation,
+    expected_number_of_months: int,
+    inflation_rate_gen: Optional[Generator[Decimal, None, None]] = None,
 ) -> tuple[list[FireSimulation], int]:
     """
     The fire simulation tries to find a point when the wealth is enough to sustain the monthly expenses for the expected number of months.
@@ -128,9 +130,11 @@ def run_fire_simulation(
             if x > i:
                 # update income to 0
                 prev = replace(simulations[-1], monthly_income=Decimal("0"))
-                next_sim = simulate_next(prev)
+                next_sim = simulate_next(prev, inflation_rate_gen=inflation_rate_gen)
             else:
-                next_sim = simulate_next(simulations[-1])
+                next_sim = simulate_next(
+                    simulations[-1], inflation_rate_gen=inflation_rate_gen
+                )
 
             if next_sim.wealth_inc_properties <= 0:
                 break

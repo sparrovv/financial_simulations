@@ -6,9 +6,6 @@ import datetime
 from datetime import timedelta
 from decimal import Decimal
 
-from fire.properties import InvestmentProperty
-
-
 project_root = Path.cwd()
 src_path = project_root / "src"
 
@@ -16,6 +13,9 @@ sys.path.append(str(src_path))
 
 from conf import get_ranges
 from fire.simulations import FireSimulation, run_fire_simulation
+from fire.properties import InvestmentProperty
+from fire.inflation import random_inflation_gen, inflation_from_file_gen
+
 
 with st.sidebar:
     currency_code = st.selectbox("Select currency code", ["USD", "PLN", "EUR"], index=0)
@@ -71,7 +71,21 @@ with st.sidebar:
 
     st.subheader("Configure parameters:")
 
-    annual_inflation_rate = st.slider("inflation_rate", 0.0, 0.2, 0.04)
+    predefined_inflation_rate = st.selectbox(
+        "Predefined inflation rate", ["fixed", "random", "historical"], index=0
+    )
+    if predefined_inflation_rate == "fixed":
+        annual_inflation_rate = st.slider("inflation_rate", 0.0, 0.2, 0.04)
+        inflation_gen = None
+    elif predefined_inflation_rate == "random":
+        inflation_gen = random_inflation_gen((1, 5))
+        annual_inflation_rate = Decimal("0.0")
+    elif predefined_inflation_rate == "historical":
+        inflation_gen = inflation_from_file_gen(
+            project_root / "data" / f"inflation_{currency_code}.csv"
+        )
+        annual_inflation_rate = Decimal("0.0")
+
     stock_return_rate = st.slider("return_rate_from_stock", 0.0, 0.2, 0.05)
     bonds_return_rate = st.slider("bonds_return_rate", 0.0, 0.2, 0.04)
     annual_income_increase_rate = st.slider(
@@ -140,7 +154,9 @@ with st.container(border=False):
     )
 
     simulation, nmb_of_sims = run_fire_simulation(
-        init, expected_number_of_months=expected_number_of_months
+        init,
+        expected_number_of_months=expected_number_of_months,
+        inflation_rate_gen=inflation_gen,
     )
     if len(simulation) < 2:
         st.error("No simulation data")
