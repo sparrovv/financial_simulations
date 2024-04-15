@@ -2,7 +2,9 @@ from datetime import date
 from decimal import Decimal
 from typing import Generator
 
-from .simulations import FireSimulation, InvestmentProperty, simulate_next
+from .properties import InvestmentProperty
+
+from .simulations import FireSimulation, simulate_next
 from decimal import Decimal
 from decimal import Decimal
 from decimal import Decimal
@@ -35,6 +37,7 @@ def test_simulation_when_enough_not_enough_cash() -> None:
         "bonds_return_rate": 0,
         "annual_income_increase_rate": 0,
         "annual_inflation_rate": 0,
+        "monthly_inflation_rate": 0.0,
         "annual_property_appreciation_rate": 0.00,
         "invest_cash_surplus": False,
         "invest_cash_surplus_strategy": "80-20",
@@ -78,6 +81,7 @@ def test_simulation_when_enough_cash_and_stock_and_bonds() -> None:
         "monthly_income": 0,
         "bonds_return_rate": 0,
         "annual_inflation_rate": 0,
+        "monthly_inflation_rate": 0.0,
         "annual_property_appreciation_rate": 0.00,
         "invest_cash_surplus": False,
         "invest_cash_surplus_strategy": "80-20",
@@ -113,6 +117,7 @@ def test_simulation_when_not_enough_cash_and_stock() -> None:
         "properties_market_value": 0,
         "properties_monthly_income": 0,
         "annual_income_increase_rate": 0,
+        "monthly_inflation_rate": 0.0,
         "stock_return_rate": 0,
         "monthly_expenses": 31_000,
         "monthly_income": 0,
@@ -157,6 +162,7 @@ def test_when_monthly_income_is_present() -> None:
         "monthly_income": 11_000,
         "bonds_return_rate": 0,
         "annual_inflation_rate": 0,
+        "monthly_inflation_rate": 0.0,
         "annual_property_appreciation_rate": 0,
         "invest_cash_surplus": False,
         "invest_cash_surplus_strategy": "80-20",
@@ -219,6 +225,7 @@ def test_when_monthly_income_from_properties_without_mortgage_is_present() -> No
         "monthly_income": 0,
         "bonds_return_rate": 0,
         "annual_inflation_rate": 0,
+        "monthly_inflation_rate": 0.0,
         "annual_property_appreciation_rate": 0.1,
         "invest_cash_surplus": False,
         "invest_cash_surplus_strategy": "80-20",
@@ -281,6 +288,7 @@ def test_when_monthly_income_from_properties_with_mortgage_is_present() -> None:
         "monthly_income": 0,
         "bonds_return_rate": 0,
         "annual_inflation_rate": 0,
+        "monthly_inflation_rate": 0.0,
         "annual_property_appreciation_rate": 0.1,
         "properties_mortgage_left": 99355.52,
         "invest_cash_surplus": False,
@@ -334,6 +342,7 @@ def test_when_monthly_income_from_properties_with_mortgage_is_present_and_need_t
         "monthly_income": 0,
         "bonds_return_rate": 0,
         "annual_inflation_rate": 0,
+        "monthly_inflation_rate": 0.0,
         "annual_property_appreciation_rate": Decimal("0"),
         "invest_cash_surplus": False,
         "invest_cash_surplus_strategy": "80-20",
@@ -375,6 +384,7 @@ def test_when_applying_stock_investment_return_rates() -> None:
         "monthly_income": 0,
         "bonds_return_rate": 0,
         "annual_inflation_rate": 0,
+        "monthly_inflation_rate": 0.0,
         "annual_property_appreciation_rate": 0.00,
         "properties_net_cash_value": 0,
         "invest_cash_surplus": False,
@@ -416,6 +426,7 @@ def test_when_applying_bonds_investment_return_rates() -> None:
         "monthly_expenses": 11_000,
         "monthly_income": 0,
         "annual_inflation_rate": 0,
+        "monthly_inflation_rate": 0.0,
         "annual_property_appreciation_rate": 0.00,
         "properties_net_cash_value": 0,
         "invest_cash_surplus": False,
@@ -458,6 +469,7 @@ def test_when_applying_inflation_rate_to_monthly_expenses() -> None:
         "monthly_expenses": 11_027.5,
         "monthly_income": 0,
         "annual_inflation_rate": 0.03,
+        "monthly_inflation_rate": 0.0025,
         "annual_property_appreciation_rate": 0.00,
         "properties_net_cash_value": 0,
         "invest_cash_surplus": False,
@@ -504,6 +516,7 @@ def test_that_surplus_money_is_invested() -> None:
         "monthly_expenses": 10000,
         "monthly_income": 0,
         "annual_inflation_rate": 0.00,
+        "monthly_inflation_rate": 0,
         "annual_property_appreciation_rate": 0.01,
         "properties_net_cash_value": 0,
         "properties_mortgage_left": 0,
@@ -543,6 +556,7 @@ def test_simulation_when_annual_increase_happens() -> None:
         "stock_return_rate": 0,
         "bonds_return_rate": 0,
         "annual_inflation_rate": 0,
+        "monthly_inflation_rate": 0,
         "annual_property_appreciation_rate": 0.00,
         "invest_cash_surplus": False,
         "invest_cash_surplus_strategy": "80-20",
@@ -590,6 +604,7 @@ def test_simulation_when_inflation_generator_is_provided() -> None:
         "stock_return_rate": 0,
         "bonds_return_rate": 0,
         "annual_inflation_rate": 0.12,
+        "monthly_inflation_rate": 0.01,
         "annual_property_appreciation_rate": 0,
         "invest_cash_surplus": False,
         "invest_cash_surplus_strategy": "80-20",

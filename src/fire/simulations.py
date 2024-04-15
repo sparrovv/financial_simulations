@@ -1,77 +1,14 @@
 from dataclasses import dataclass, asdict, field, replace
 from datetime import date
 from typing import Generator, Literal, Optional
-from .mortgage import calculate_monthly_payment
+
+from fire.properties import InvestmentProperty, simulate_next_property_month
 from decimal import Decimal, getcontext
 from logging import getLogger
 
 getcontext().prec = 26
 
 logger = getLogger(__name__)
-
-
-@dataclass
-class InvestmentProperty:
-    market_value: Decimal
-    monthly_income: Decimal
-    mortgage_left: Decimal
-    mortgage_rate: Decimal
-    mortgage_months: int
-    monthly_interest: Decimal = Decimal("0")
-    monthly_payment: Decimal = Decimal("0")
-    annual_rent_increase_rate: Decimal = Decimal("0")
-
-    def is_with_mortgage(self) -> bool:
-        return self.mortgage_left > 0
-
-    def net_cash_value(self) -> Decimal:
-        return self.market_value - self.mortgage_left
-
-    def to_dict(self):
-        return asdict(self) | {"net_cash_value": self.net_cash_value()}
-
-    def __post_init__(self):
-        if self.is_with_mortgage():
-            monthly_payment, monthly_interest = calculate_monthly_payment(
-                principal=self.mortgage_left,
-                rate=self.mortgage_rate,
-                number_of_months_left=self.mortgage_months,
-            )
-
-            self.monthly_interest = monthly_interest
-            self.monthly_payment = monthly_payment
-
-
-def simulate_next_property_month(
-    prev: InvestmentProperty, annual_property_appreciation_rate: Decimal, sim_date: date
-) -> InvestmentProperty:
-    new_market_value = round(
-        prev.market_value
-        + (prev.market_value * annual_property_appreciation_rate / Decimal("12")),
-        2,
-    )
-
-    new_monthly_income = prev.monthly_income
-    if sim_date.month == 1:
-        new_monthly_income = prev.monthly_income * (1 + prev.annual_rent_increase_rate)
-
-    if prev.is_with_mortgage() is False:
-        return replace(prev, market_value=new_market_value)
-
-    # calculate the principal
-    monthly_principal = prev.monthly_payment - prev.monthly_interest
-
-    new_mortgage_left = prev.mortgage_left - monthly_principal
-    new_mortgage_months = prev.mortgage_months - 1
-
-    return InvestmentProperty(
-        market_value=new_market_value,
-        monthly_income=new_monthly_income,
-        mortgage_left=new_mortgage_left,
-        mortgage_rate=prev.mortgage_rate,
-        mortgage_months=new_mortgage_months,
-        annual_rent_increase_rate=prev.annual_rent_increase_rate,
-    )
 
 
 @dataclass
@@ -89,6 +26,7 @@ class FireSimulation:
     bonds_return_rate: Decimal = Decimal(0)
 
     annual_inflation_rate: Decimal = Decimal(0)
+    monthly_inflation_rate: Decimal = Decimal(0)
     annual_income_increase_rate: Decimal = Decimal(0)
     # this should be more or less the same as the inflation rate
     annual_property_appreciation_rate: Decimal = Decimal(0)
@@ -338,6 +276,7 @@ def simulate_next(
         monthly_expenses=round(total_monthly_expenses, 2),
         monthly_income=round(new_monthly_income, 2),
         annual_inflation_rate=annual_inflation_rate,
+        monthly_inflation_rate=monthly_inflation_rate,
         annual_property_appreciation_rate=prev.annual_property_appreciation_rate,
         invest_cash_surplus=prev.invest_cash_surplus,
         invest_cash_threshold=prev.invest_cash_threshold,

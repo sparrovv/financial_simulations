@@ -6,6 +6,8 @@ import datetime
 from datetime import timedelta
 from decimal import Decimal
 
+from fire.properties import InvestmentProperty
+
 
 project_root = Path.cwd()
 src_path = project_root / "src"
@@ -13,7 +15,7 @@ src_path = project_root / "src"
 sys.path.append(str(src_path))
 
 from conf import get_ranges
-from fire.simulations import FireSimulation, run_fire_simulation, InvestmentProperty
+from fire.simulations import FireSimulation, run_fire_simulation
 
 with st.sidebar:
     currency_code = st.selectbox("Select currency code", ["USD", "PLN", "EUR"], index=0)

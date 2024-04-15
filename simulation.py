@@ -11,7 +11,8 @@ src_path = project_root / "src"
 
 sys.path.append(str(src_path))
 
-from fire.simulations import FireSimulation, run_simulation, InvestmentProperty
+from fire.properties import InvestmentProperty
+from fire.simulations import FireSimulation, run_simulation
 from conf import get_ranges
 
 with st.sidebar:
