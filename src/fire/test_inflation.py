@@ -11,10 +11,10 @@ def test_random_inflation_gen() -> None:
 
 
 def test_from_file_gen() -> None:
-    inflation_date = """date, value
-    2020, 0.024
-    2021, 0.08
-    2022, 0.14
+    inflation_date = """date,value
+    2020,0.024
+    2021,0.08
+    2022,0.14
 """
 
     file_path = None
