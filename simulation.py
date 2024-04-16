@@ -2,8 +2,6 @@ import sys
 from pathlib import Path
 import streamlit as st
 import pandas as pd
-import datetime
-import plotly.express as px
 from decimal import Decimal
 
 project_root = Path.cwd()
@@ -13,8 +11,9 @@ sys.path.append(str(src_path))
 
 from finsim.properties import InvestmentProperty
 from finsim.simulations import FireSimulation, run_simulation
-from view.conf import get_ranges
 from view.sidebar import simple_sim_sidebar
+from view.helpers import first_day_of_the_month
+
 
 with st.sidebar:
     sidebarAttrs = simple_sim_sidebar(project_root)
@@ -53,7 +52,7 @@ with st.container(border=False):
         invest_cash_surplus=sidebarAttrs.invest_cash_surplus,
         invest_cash_threshold=to_d(sidebarAttrs.invest_cash_threshold),
         invest_cash_surplus_strategy=sidebarAttrs.invest_cash_surplus_strategy,
-        date=datetime.datetime.fromisoformat("2024-03-01"),
+        date=first_day_of_the_month(),
     )
 
     # simulate for next X years

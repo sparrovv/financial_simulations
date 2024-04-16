@@ -11,6 +11,7 @@ src_path = project_root / "src"
 
 sys.path.append(str(src_path))
 
+from view.helpers import first_day_of_the_month
 from view.sidebar import fire_sidebar
 from finsim.simulations import FireSimulation, run_fire_simulation
 from finsim.properties import InvestmentProperty
@@ -68,7 +69,7 @@ with st.container(border=False):
         invest_cash_surplus=sidebarAttrs.invest_cash_surplus,
         invest_cash_threshold=to_d(sidebarAttrs.invest_cash_threshold),
         invest_cash_surplus_strategy=sidebarAttrs.invest_cash_surplus_strategy,
-        date=datetime.datetime.fromisoformat("2024-03-01"),
+        date=first_day_of_the_month(),
     )
 
     simulation, nmb_of_sims = run_fire_simulation(
