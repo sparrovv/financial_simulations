@@ -1,13 +1,9 @@
 from datetime import date
 from decimal import Decimal
 from typing import Generator
+from fire.properties import InvestmentProperty
 
-from .properties import InvestmentProperty
-
-from .simulations import FireSimulation, simulate_next
-from decimal import Decimal
-from decimal import Decimal
-from decimal import Decimal
+from fire.simulations import FireSimulation, simulate_next
 
 
 def test_simulation_when_enough_not_enough_cash() -> None:

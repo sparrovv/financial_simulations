@@ -1,5 +1,5 @@
 from decimal import Decimal
-from .inflation import random_inflation_gen, inflation_from_file_gen
+from fire.inflation import random_inflation_gen, inflation_from_file_gen
 import tempfile
 
 
