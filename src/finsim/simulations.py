@@ -2,7 +2,7 @@ from dataclasses import dataclass, asdict, field, replace
 from datetime import date
 from typing import Generator, Literal, Optional
 
-from fire.properties import InvestmentProperty, simulate_next_property_month
+from finsim.properties import InvestmentProperty, simulate_next_property_month
 from decimal import Decimal, getcontext
 from logging import getLogger
 

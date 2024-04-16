@@ -4,8 +4,8 @@ import streamlit as st
 import datetime
 from datetime import timedelta
 from decimal import Decimal
-from fire.inflation import inflation_from_file_gen, random_inflation_gen
-from fire.properties import InvestmentProperty
+from finsim.inflation import inflation_from_file_gen, random_inflation_gen
+from finsim.properties import InvestmentProperty
 from view.conf import get_ranges
 
 

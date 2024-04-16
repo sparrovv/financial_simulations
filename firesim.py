@@ -3,7 +3,6 @@ from pathlib import Path
 import streamlit as st
 import pandas as pd
 import datetime
-from datetime import timedelta
 from decimal import Decimal
 
 
@@ -13,8 +12,8 @@ src_path = project_root / "src"
 sys.path.append(str(src_path))
 
 from view.sidebar import fire_sidebar
-from fire.simulations import FireSimulation, run_fire_simulation
-from fire.properties import InvestmentProperty
+from finsim.simulations import FireSimulation, run_fire_simulation
+from finsim.properties import InvestmentProperty
 
 
 with st.sidebar:

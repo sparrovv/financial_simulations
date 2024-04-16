@@ -1,5 +1,5 @@
 from datetime import date
-from fire.mortgage import calculate_monthly_payment
+from finsim.mortgage import calculate_monthly_payment
 
 
 from dataclasses import asdict, dataclass, replace
