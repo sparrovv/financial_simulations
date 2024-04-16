@@ -82,7 +82,8 @@ with st.sidebar:
         annual_inflation_rate = Decimal("0.0")
     elif predefined_inflation_rate == "historical":
         inflation_gen = inflation_from_file_gen(
-            project_root / "data" / f"inflation_{currency_code}.csv", monthly=True
+            project_root / "data" / f"monthly_cpi_simulated_{currency_code}.csv",
+            monthly=True,
         )
         annual_inflation_rate = Decimal("1.0")
 
