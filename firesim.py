@@ -12,13 +12,27 @@ src_path = project_root / "src"
 sys.path.append(str(src_path))
 
 from view.helpers import first_day_of_the_month
-from view.sidebar import fire_sidebar
+from view.sidebar import (
+    fire_sidebar,
+    get_fie_sidebar_defaults,
+    query_to_attrs,
+    update_query_params,
+)
 from finsim.simulations import FireSimulation, run_fire_simulation
 from finsim.properties import InvestmentProperty
 
 
+if "query_params_read" not in st.session_state:
+    b = get_fie_sidebar_defaults()
+    defaults = query_to_attrs(b)
+    st.session_state.query_params_read = True
+    for k, v in defaults.__dict__.items():
+        st.session_state[k] = v
+
+
 with st.sidebar:
     sidebarAttrs = fire_sidebar(project_root)
+    update_query_params(sidebarAttrs)
 
 
 with st.container(border=False):
@@ -75,7 +89,7 @@ with st.container(border=False):
     simulation, nmb_of_sims = run_fire_simulation(
         init,
         expected_number_of_months=sidebarAttrs.expected_number_of_months,
-        inflation_rate_gen=sidebarAttrs.inflation_gen,
+        inflation_rate_gen=sidebarAttrs.inflation_gen(root_path=project_root),
     )
     if len(simulation) < 2:
         st.error("No simulation data")

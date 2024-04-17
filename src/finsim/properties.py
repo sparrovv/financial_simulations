@@ -18,7 +18,11 @@ class InvestmentProperty:
     annual_rent_increase_rate: Decimal = Decimal("0")
 
     def is_with_mortgage(self) -> bool:
-        return self.mortgage_left > 0
+        return (
+            self.mortgage_left > 0
+            and self.mortgage_months > 0
+            and self.mortgage_rate > 0
+        )
 
     def net_cash_value(self) -> Decimal:
         return self.market_value - self.mortgage_left
