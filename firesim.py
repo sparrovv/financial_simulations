@@ -14,7 +14,7 @@ sys.path.append(str(src_path))
 from view.helpers import first_day_of_the_month
 from view.sidebar import (
     fire_sidebar,
-    get_fie_sidebar_defaults,
+    get_fire_sidebar_defaults,
     query_to_attrs,
     update_query_params,
 )
@@ -23,7 +23,7 @@ from finsim.properties import InvestmentProperty
 
 
 if "query_params_read" not in st.session_state:
-    b = get_fie_sidebar_defaults()
+    b = get_fire_sidebar_defaults()
     defaults = query_to_attrs(b)
     st.session_state.query_params_read = True
     for k, v in defaults.__dict__.items():

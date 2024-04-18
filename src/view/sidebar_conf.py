@@ -57,4 +57,3 @@ class FireSidebarAttrs(BaseSidebarAttrs):
 @dataclass
 class SimpleSimSidebarAttrs(BaseSidebarAttrs):
     years: int
-    currency_code: str

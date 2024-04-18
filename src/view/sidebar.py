@@ -9,12 +9,15 @@ from finsim.properties import InvestmentProperty
 from view.conf import get_ranges
 from view.sidebar_conf import BaseSidebarAttrs, FireSidebarAttrs, SimpleSimSidebarAttrs
 from urllib.parse import quote_plus, unquote_plus
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class JEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, Decimal):
-            return str(obj)
+            return float(obj)
 
         if isinstance(obj, datetime.datetime):
             return obj.isoformat()
@@ -37,11 +40,9 @@ def update_query_params(attrs: BaseSidebarAttrs) -> None:
     st.query_params["props"] = encoded
 
 
-def query_to_attrs(defaults: FireSidebarAttrs) -> FireSidebarAttrs:
+def query_to_attrs(defaults: BaseSidebarAttrs) -> BaseSidebarAttrs:
     accu = {}
     probablyJson = st.query_params.get("props", None)
-
-    # handle exception
 
     try:
         # this can fail as people can tamper with the query params
@@ -52,28 +53,51 @@ def query_to_attrs(defaults: FireSidebarAttrs) -> FireSidebarAttrs:
         return replace(defaults, **accu)
 
     except Exception as e:
-        print(e)
+        logger.warn("Failed to parse query params")
+        logger.warn(e)
         return defaults
 
 
 def simple_sim_sidebar(root_path: Path) -> SimpleSimSidebarAttrs:
     currency_code: str = st.selectbox(
-        "Select currency code", ["USD", "PLN", "EUR"], index=0
+        "Select currency code", ["PLN", "USD", "EUR"], index=0, key="currency_code"
     )  # type: ignore
 
-    years = st.slider("How many years to simulate?", 1, 100, 20)
+    years = st.slider("How many years to simulate?", 1, 100, key="years")
     f"Simulating for {years} years"
 
     base = _shared(root_path, currency_code)
 
     return SimpleSimSidebarAttrs(
         years=years,
-        currency_code=currency_code,
         **base.__dict__,
     )
 
 
-def get_fie_sidebar_defaults() -> FireSidebarAttrs:
+def get_simple_sidebar_defaults() -> FireSidebarAttrs:
+    return SimpleSimSidebarAttrs(
+        currency_code="PLN",
+        years=15,
+        monthly_income=Decimal("10_000"),
+        monthly_expenses=Decimal("8_000"),
+        stock_investment=Decimal("0"),
+        bond_investment=Decimal("0"),
+        cash=Decimal("10_000"),
+        number_of_investment_properties=0,
+        investment_properties=[],
+        annual_inflation_rate=Decimal("0.02"),
+        stock_return_rate=Decimal("0.05"),
+        bonds_return_rate=Decimal("0.02"),
+        annual_income_increase_rate=Decimal("0.02"),
+        annual_property_appreciation_rate=Decimal("0.02"),
+        invest_cash_surplus=True,
+        invest_cash_surplus_strategy="60-40",
+        invest_cash_threshold=Decimal("50000"),
+        inflation_type_calc="fixed",
+    )
+
+
+def get_fire_sidebar_defaults() -> FireSidebarAttrs:
     expected_age = 80
     return FireSidebarAttrs(
         currency_code="PLN",
@@ -180,34 +204,38 @@ def _shared(root_path: Path, currency_code: str) -> BaseSidebarAttrs:
     annual_inflation_rate = Decimal("0.02")
     if inflation_type_calc == "fixed":
         annual_inflation_rate = st.slider(
-            "inflation_rate", 0.0, 0.2, 0.04, key="annual_inflation_rate"
+            "inflation_rate", 0.0, 0.2, key="annual_inflation_rate"
         )
 
     stock_return_rate = st.slider(
-        "return_rate_from_stock", 0.0, 0.2, 0.05, key="stock_return_rate"
+        "return_rate_from_stock", 0.0, 0.2, key="stock_return_rate"
     )
     bonds_return_rate = st.slider(
-        "bonds_return_rate", 0.0, 0.2, 0.04, key="bonds_return_rate"
+        "bonds_return_rate", 0.0, 0.2, key="bonds_return_rate"
     )
     annual_income_increase_rate = st.slider(
-        "annual_income_increase_rate", 0.0, 0.2, 0.03, key="annual_income_increase_rate"
+        "annual_income_increase_rate", 0.0, 0.2, key="annual_income_increase_rate"
     )
     annual_property_appreciation_rate = st.slider(
         "annual_property_appreciation_rate",
         0.0,
         0.1,
-        0.02,
         key="annual_property_appreciation_rate",
     )
     invest_cash_surplus = st.checkbox(
         "Invest cash surplus", value=True, key="invest_cash_surplus"
     )
     invest_cash_surplus_strategy = st.selectbox(
-        "Invest cash surplus strategy", ["50-50", "60-40", "80-20"], index=1
+        "Invest cash surplus strategy",
+        ["50-50", "60-40", "80-20"],
+        index=1,
+        key="invest_cash_surplus_strategy",
     )
 
     invest_cash_threshold = st.slider(
-        "Invest cash threshold", *r["invest_cash_threshold"]
+        "Invest cash threshold",
+        *r["invest_cash_threshold"],
+        key="invest_cash_threshold",
     )
 
     return BaseSidebarAttrs(

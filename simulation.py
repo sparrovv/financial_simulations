@@ -2,6 +2,7 @@ import sys
 from pathlib import Path
 import streamlit as st
 import pandas as pd
+import decimal
 from decimal import Decimal
 
 project_root = Path.cwd()
@@ -11,12 +12,27 @@ sys.path.append(str(src_path))
 
 from finsim.properties import InvestmentProperty
 from finsim.simulations import FireSimulation, run_simulation
-from view.sidebar import simple_sim_sidebar
+from view.sidebar import (
+    get_simple_sidebar_defaults,
+    query_to_attrs,
+    simple_sim_sidebar,
+    update_query_params,
+)
 from view.helpers import first_day_of_the_month
+
+
+if "query_params_read" not in st.session_state:
+    hardcoded_defaults = get_simple_sidebar_defaults()
+    calculated_defaults = query_to_attrs(hardcoded_defaults)
+    st.session_state.query_params_read = True
+
+    for k, v in calculated_defaults.__dict__.items():
+        st.session_state[k] = v
 
 
 with st.sidebar:
     sidebarAttrs = simple_sim_sidebar(project_root)
+    update_query_params(sidebarAttrs)
 
 
 with st.container(border=False):
@@ -57,7 +73,9 @@ with st.container(border=False):
 
     # simulate for next X years
     simulation = run_simulation(
-        init, sidebarAttrs.years * 12, inflation_rate_gen=sidebarAttrs.inflation_gen
+        init,
+        sidebarAttrs.years * 12,
+        inflation_rate_gen=sidebarAttrs.inflation_gen(root_path=project_root),
     )
 
     df = pd.DataFrame([s.to_dict() for s in simulation])
