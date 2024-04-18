@@ -11,21 +11,21 @@ from finsim.properties import InvestmentProperty
 @dataclass
 class BaseSidebarAttrs:
     currency_code: str
-    monthly_income: Decimal
-    monthly_expenses: Decimal
-    stock_investment: Decimal
-    bond_investment: Decimal
-    cash: Decimal
+    monthly_income: float
+    monthly_expenses: float
+    stock_investment: float
+    bond_investment: float
+    cash: float
     number_of_investment_properties: int
     investment_properties: list[InvestmentProperty]
-    annual_inflation_rate: Decimal
-    stock_return_rate: Decimal
-    bonds_return_rate: Decimal
-    annual_income_increase_rate: Decimal
-    annual_property_appreciation_rate: Decimal
+    annual_inflation_rate: float
+    stock_return_rate: float
+    bonds_return_rate: float
+    annual_income_increase_rate: float
+    annual_property_appreciation_rate: float
     invest_cash_surplus: bool
     invest_cash_surplus_strategy: str
-    invest_cash_threshold: Decimal
+    invest_cash_threshold: float
     inflation_type_calc: str
 
     def inflation_gen(self, root_path: Path) -> Generator[Decimal, None, None]:

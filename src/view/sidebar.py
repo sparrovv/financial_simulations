@@ -1,3 +1,4 @@
+from base64 import b64decode, b64encode
 from dataclasses import replace, asdict
 from pathlib import Path
 import streamlit as st
@@ -21,6 +22,7 @@ class JEncoder(json.JSONEncoder):
 
         if isinstance(obj, datetime.datetime):
             return obj.isoformat()
+
         return super().default(obj)
 
 
@@ -35,7 +37,7 @@ def is_number(s: str) -> bool:
 def update_query_params(attrs: BaseSidebarAttrs) -> None:
     # convert dataclass attrs to json
     json_str = json.dumps(asdict(attrs), cls=JEncoder)
-    encoded = quote_plus(json_str)
+    encoded = b64encode(json_str.encode("utf-8")).decode("utf-8")
 
     st.query_params["props"] = encoded
 
@@ -47,7 +49,7 @@ def query_to_attrs(defaults: BaseSidebarAttrs) -> BaseSidebarAttrs:
     try:
         # this can fail as people can tamper with the query params
         if probablyJson:
-            decoded = unquote_plus(probablyJson)
+            decoded = b64decode(probablyJson).decode("utf-8")
             accu = json.loads(decoded)
 
         return replace(defaults, **accu)
@@ -78,21 +80,21 @@ def get_simple_sidebar_defaults() -> FireSidebarAttrs:
     return SimpleSimSidebarAttrs(
         currency_code="PLN",
         years=15,
-        monthly_income=Decimal("10_000"),
-        monthly_expenses=Decimal("8_000"),
-        stock_investment=Decimal("0"),
-        bond_investment=Decimal("0"),
-        cash=Decimal("10_000"),
+        monthly_income=10_000.0,
+        monthly_expenses=8_000.0,
+        stock_investment=0.0,
+        bond_investment=0.0,
+        cash=10_000.0,
         number_of_investment_properties=0,
         investment_properties=[],
-        annual_inflation_rate=Decimal("0.02"),
-        stock_return_rate=Decimal("0.05"),
-        bonds_return_rate=Decimal("0.02"),
-        annual_income_increase_rate=Decimal("0.02"),
-        annual_property_appreciation_rate=Decimal("0.02"),
+        annual_inflation_rate=0.02,
+        stock_return_rate=0.05,
+        bonds_return_rate=0.02,
+        annual_income_increase_rate=0.02,
+        annual_property_appreciation_rate=0.02,
         invest_cash_surplus=True,
         invest_cash_surplus_strategy="60-40",
-        invest_cash_threshold=Decimal("50000"),
+        invest_cash_threshold=50_000.0,
         inflation_type_calc="fixed",
     )
 
@@ -105,21 +107,21 @@ def get_fire_sidebar_defaults() -> FireSidebarAttrs:
         expected_age=expected_age,
         date_of_death=datetime.datetime.now() + timedelta(days=expected_age * 365),
         expected_number_of_months=expected_age * 12,
-        monthly_income=Decimal("10_000"),
-        monthly_expenses=Decimal("8_000"),
-        stock_investment=Decimal("0"),
-        bond_investment=Decimal("0"),
-        cash=Decimal("10_000"),
+        monthly_income=10000.0,
+        monthly_expenses=8000.0,
+        stock_investment=0.0,
+        bond_investment=0.0,
+        cash=10000.0,
         number_of_investment_properties=0,
         investment_properties=[],
-        annual_inflation_rate=Decimal("0.02"),
-        stock_return_rate=Decimal("0.05"),
-        bonds_return_rate=Decimal("0.02"),
-        annual_income_increase_rate=Decimal("0.02"),
-        annual_property_appreciation_rate=Decimal("0.02"),
+        annual_inflation_rate=0.02,
+        stock_return_rate=0.05,
+        bonds_return_rate=0.02,
+        annual_income_increase_rate=0.02,
+        annual_property_appreciation_rate=0.02,
         invest_cash_surplus=True,
         invest_cash_surplus_strategy="60-40",
-        invest_cash_threshold=Decimal("50000"),
+        invest_cash_threshold=50000.0,
         inflation_type_calc="fixed",
     )
 
@@ -208,13 +210,16 @@ def _shared(root_path: Path, currency_code: str) -> BaseSidebarAttrs:
         )
 
     stock_return_rate = st.slider(
-        "return_rate_from_stock", 0.0, 0.2, key="stock_return_rate"
+        "return_rate_from_stock", min_value=0.0, max_value=0.2, key="stock_return_rate"
     )
     bonds_return_rate = st.slider(
         "bonds_return_rate", 0.0, 0.2, key="bonds_return_rate"
     )
     annual_income_increase_rate = st.slider(
-        "annual_income_increase_rate", 0.0, 0.2, key="annual_income_increase_rate"
+        "annual_income_increase_rate",
+        min_value=0.0,
+        max_value=0.2,
+        key="annual_income_increase_rate",
     )
     annual_property_appreciation_rate = st.slider(
         "annual_property_appreciation_rate",
