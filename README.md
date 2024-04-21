@@ -17,22 +17,23 @@ It takes into account:
 - Investments in real estate, mortgage, and the income from renting
 - Reinvestment of the spare cash into stocks and bonds with the adjustable ratio
 - When there's no more cash, it sells stocks, bonds and then real estate to cover the expenses
+- Historical ACWI data to simulate the stock rate of return - very naive approach with no consideration of the current market situation
+- Historical inflation rate to simulate the future - same as the above, very naive random approach from mean and std deviation
 
 It doesn't take into account:
 
 - Taxes 
 - Other sources of income
-- And probably many more things
+- ...
 
 Things to do:
 
-- Simulate the stock market rate of returns based on some historical data
-- Simulate the inflation rate based on some historical data
 - Add more visualizations
 
-## streamlit
+## Visualizations
 
-https://finsim.streamlit.app/
+- https://finsim.streamlit.app/ - simulate how long your savings will last
+- https://firesim.streamlit.app/ - simulate when you reach financial independence
 
 ## tests
 
