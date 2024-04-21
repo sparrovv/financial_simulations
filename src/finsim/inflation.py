@@ -9,6 +9,12 @@ def random_inflation_gen(range: tuple[int, int]) -> Generator[Decimal, None, Non
         yield Decimal(str(random_between_range))
 
 
+def rate_from_file_gen(
+    rate_path: str, monthly: bool = False
+) -> Generator[Decimal, None, None]:
+    return inflation_from_file_gen(rate_path, monthly)
+
+
 def inflation_from_file_gen(
     inflation_path: str, monthly: bool = False
 ) -> Generator[Decimal, None, None]:

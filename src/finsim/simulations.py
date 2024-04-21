@@ -99,10 +99,13 @@ def run_simulation(
     init: FireSimulation,
     months: int,
     inflation_rate_gen: Optional[Generator[Decimal, None, None]] = None,
+    stock_gen: Optional[Generator[Decimal, None, None]] = None,
 ) -> list[FireSimulation]:
     simulations = [init]
     for _ in range(months):
-        next_sim = simulate_next(simulations[-1], inflation_rate_gen=inflation_rate_gen)
+        next_sim = simulate_next(
+            simulations[-1], inflation_rate_gen=inflation_rate_gen, stock_gen=stock_gen
+        )
         if next_sim.wealth_inc_properties < 0:
             break
 
@@ -114,6 +117,7 @@ def run_fire_simulation(
     init: FireSimulation,
     expected_number_of_months: int,
     inflation_rate_gen: Optional[Generator[Decimal, None, None]] = None,
+    stock_gen: Optional[Generator[Decimal, None, None]] = None,
 ) -> tuple[list[FireSimulation], int]:
     """
     The fire simulation tries to find a point when the wealth is enough to sustain the monthly expenses for the expected number of months.
@@ -130,10 +134,14 @@ def run_fire_simulation(
             if x > i:
                 # update income to 0
                 prev = replace(simulations[-1], monthly_income=Decimal("0"))
-                next_sim = simulate_next(prev, inflation_rate_gen=inflation_rate_gen)
+                next_sim = simulate_next(
+                    prev, inflation_rate_gen=inflation_rate_gen, stock_gen=stock_gen
+                )
             else:
                 next_sim = simulate_next(
-                    simulations[-1], inflation_rate_gen=inflation_rate_gen
+                    simulations[-1],
+                    inflation_rate_gen=inflation_rate_gen,
+                    stock_gen=stock_gen,
                 )
 
             if next_sim.wealth_inc_properties <= 0:
@@ -151,6 +159,7 @@ def run_fire_simulation(
 def simulate_next(
     prev: FireSimulation,
     inflation_rate_gen: Optional[Generator[Decimal, None, None]] = None,
+    stock_gen: Optional[Generator[Decimal, None, None]] = None,
 ) -> FireSimulation:
     # add one month to the start date, year should change if month is 12
 
@@ -193,10 +202,12 @@ def simulate_next(
     new_bonds_investments = prev.bonds_investments + (
         prev.bonds_investments * prev.bonds_return_rate / Decimal("12")
     )
-    # if there are any stock investments, calculate the return rate and add it to the stock investments
-    new_stock_investments = prev.stock_investments + (
-        prev.stock_investments * prev.stock_return_rate / Decimal("12")
-    )
+    if stock_gen:
+        new_stock_investments = prev.stock_investments * (1 + next(stock_gen))
+    else:
+        new_stock_investments = prev.stock_investments * (
+            1 + prev.stock_return_rate / Decimal("12")
+        )
 
     if total_monthly_cash > total_monthly_expenses:
         new_cash = total_monthly_cash - total_monthly_expenses

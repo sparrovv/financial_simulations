@@ -27,12 +27,23 @@ class BaseSidebarAttrs:
     invest_cash_surplus_strategy: str
     invest_cash_threshold: float
     inflation_type_calc: str
+    stock_type_calc: str
 
     def inflation_gen(self, root_path: Path) -> Generator[Decimal, None, None]:
         gen = None
         if self.inflation_type_calc == "simulated":
             gen = inflation_from_file_gen(
                 root_path / "data" / f"monthly_cpi_simulated_{self.currency_code}.csv",
+                monthly=True,
+            )
+
+        return gen
+
+    def stock_gen(self, root_path: Path) -> Generator[Decimal, None, None]:
+        gen = None
+        if self.stock_type_calc == "simulated_acwi":
+            gen = inflation_from_file_gen(
+                root_path / "data" / "acwi_monthly_simulation.csv",
                 monthly=True,
             )
 

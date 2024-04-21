@@ -76,6 +76,7 @@ with st.container(border=False):
         init,
         sidebarAttrs.years * 12,
         inflation_rate_gen=sidebarAttrs.inflation_gen(root_path=project_root),
+        stock_gen=sidebarAttrs.stock_gen(root_path=project_root),
     )
 
     df = pd.DataFrame([s.to_dict() for s in simulation])

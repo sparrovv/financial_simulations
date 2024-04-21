@@ -154,18 +154,35 @@ def fire_sidebar(root_path: Path) -> FireSidebarAttrs:
 def _shared(root_path: Path, currency_code: str) -> BaseSidebarAttrs:
     r = get_ranges(currency_code)
     st.subheader("Provide monthly income and expenses:")
-    monthly_income = st.number_input("income", 0, key="monthly_income", step=500)
+    monthly_income = st.number_input(
+        "Monthly salary", 0, key="monthly_income", step=500
+    )
     monthly_expenses = st.number_input(
-        "monthly_expenses", 0, key="monthly_expenses", step=500
+        "Monthly expenses", 0, key="monthly_expenses", step=500
     )
 
     st.subheader("Provide basic savings and expenses information:")
     stock_investment = st.number_input(
-        "stock_investment", 0, key="stock_investment", step=1000
+        "Stocks / ETFs", 0, key="stock_investment", step=1000
     )
-    bond_investment = st.number_input("bond_investment", 0, key="bond_investment")
-    cash = st.number_input("cash", 0, key="cash", step=1000)
+    bond_investment = st.number_input("Bonds", 0, key="bond_investment")
+    cash = st.number_input("Cash", 0, key="cash", step=1000)
 
+    invest_cash_surplus = st.checkbox(
+        "Invest cash surplus", value=True, key="invest_cash_surplus"
+    )
+    invest_cash_surplus_strategy = st.selectbox(
+        "Invest cash surplus strategy",
+        ["50-50", "60-40", "80-20"],
+        index=1,
+        key="invest_cash_surplus_strategy",
+    )
+
+    invest_cash_threshold = st.slider(
+        "Invest cash threshold",
+        *r["invest_cash_threshold"],
+        key="invest_cash_threshold",
+    )
     st.subheader("Any investment properties?")
 
     number_of_investment_properties = st.number_input(
@@ -194,53 +211,54 @@ def _shared(root_path: Path, currency_code: str) -> BaseSidebarAttrs:
         )
         investment_properties.append(i)
 
-    st.subheader("Configure parameters:")
+    st.subheader("Configuration parameters")
 
     inflation_type_calc = st.selectbox(
-        "Predefined inflation rate",
+        "Inflation rate",
         ["fixed", "simulated"],
         index=0,
         key="inflation_type_calc",
     )
 
     annual_inflation_rate = Decimal("0.02")
-    if inflation_type_calc == "fixed":
-        annual_inflation_rate = st.slider(
-            "inflation_rate", 0.0, 0.2, key="annual_inflation_rate"
-        )
+
+    annual_inflation_rate = st.slider(
+        "inflation_rate",
+        0.0,
+        0.2,
+        key="annual_inflation_rate",
+        disabled=(inflation_type_calc != "fixed"),
+    )
+
+    stock_type_calc = st.selectbox(
+        "Stock / ETF type calculation",
+        ["fixed", "simulated_acwi"],
+        index=0,
+        key="stock_type_calc",
+    )
 
     stock_return_rate = st.slider(
-        "return_rate_from_stock", min_value=0.0, max_value=0.2, key="stock_return_rate"
+        "Annual stock return rate",
+        min_value=0.0,
+        max_value=0.2,
+        key="stock_return_rate",
+        disabled=(stock_type_calc != "fixed"),
     )
+
     bonds_return_rate = st.slider(
-        "bonds_return_rate", 0.0, 0.2, key="bonds_return_rate"
+        "Annual bonds return rate", 0.0, 0.2, key="bonds_return_rate"
     )
     annual_income_increase_rate = st.slider(
-        "annual_income_increase_rate",
+        "Annual income increase rate",
         min_value=0.0,
         max_value=0.2,
         key="annual_income_increase_rate",
     )
     annual_property_appreciation_rate = st.slider(
-        "annual_property_appreciation_rate",
+        "Annual property appreciation rate",
         0.0,
         0.1,
         key="annual_property_appreciation_rate",
-    )
-    invest_cash_surplus = st.checkbox(
-        "Invest cash surplus", value=True, key="invest_cash_surplus"
-    )
-    invest_cash_surplus_strategy = st.selectbox(
-        "Invest cash surplus strategy",
-        ["50-50", "60-40", "80-20"],
-        index=1,
-        key="invest_cash_surplus_strategy",
-    )
-
-    invest_cash_threshold = st.slider(
-        "Invest cash threshold",
-        *r["invest_cash_threshold"],
-        key="invest_cash_threshold",
     )
 
     return BaseSidebarAttrs(
@@ -254,6 +272,7 @@ def _shared(root_path: Path, currency_code: str) -> BaseSidebarAttrs:
         investment_properties=investment_properties,
         annual_inflation_rate=annual_inflation_rate,
         stock_return_rate=stock_return_rate,
+        stock_type_calc=stock_type_calc,
         bonds_return_rate=bonds_return_rate,
         annual_income_increase_rate=annual_income_increase_rate,
         annual_property_appreciation_rate=annual_property_appreciation_rate,

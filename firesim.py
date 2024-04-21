@@ -90,6 +90,7 @@ with st.container(border=False):
         init,
         expected_number_of_months=sidebarAttrs.expected_number_of_months,
         inflation_rate_gen=sidebarAttrs.inflation_gen(root_path=project_root),
+        stock_gen=sidebarAttrs.stock_gen(root_path=project_root),
     )
     if len(simulation) < 2:
         st.error("No simulation data")
@@ -125,6 +126,9 @@ with st.container(border=False):
             ]
         ]
     )
+
+    st.subheader("Income and expenses")
+    st.line_chart(df[["monthly_expenses", "monthly_income"]])
 
     st.subheader("Month by month details")
 
