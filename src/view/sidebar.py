@@ -97,6 +97,7 @@ def get_simple_sidebar_defaults() -> FireSidebarAttrs:
         invest_cash_surplus_strategy="60-40",
         invest_cash_threshold=50_000.0,
         inflation_type_calc="fixed",
+        stock_type_calc="fixed",
     )
 
 

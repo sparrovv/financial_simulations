@@ -2,6 +2,7 @@ import os
 from babel.support import Translations
 from enum import Enum
 from dataclasses import dataclass
+import streamlit as st
 
 
 class Lang(Enum):
@@ -19,12 +20,12 @@ VALID_LOCALES = [
     Locale(lang=Lang.pl.value, code="pl_PL"),
     Locale(lang=Lang.en.value, code="en_US"),
 ]
-# CURRENT_LOCALE = Locale(lang=Lang.en.value, code="en_US")
-CURRENT_LOCALE = Locale(lang=Lang.pl.value, code="pl_PL")
 
 
-def set_locale(headers):
-    global CURRENT_LOCALE
+def set_locale(
+    headers: dict, default_locale: Locale = Locale(lang=Lang.pl.value, code="pl_PL")
+):
+    locale = default_locale
     if "Accept-Language" in headers:
         h = headers.get("Accept-Language", None)
         # split the languages
@@ -32,10 +33,11 @@ def set_locale(headers):
 
         for lang in langs:
             if lang in map(lambda x: x.lang, VALID_LOCALES):
-                CURRENT_LOCALE = VALID_LOCALES[lang]
+                locale = VALID_LOCALES[lang]
                 break
 
-    return CURRENT_LOCALE
+    st.session_state.locale = locale
+    return locale
 
 
 def load_translations(locale):
@@ -44,5 +46,6 @@ def load_translations(locale):
 
 
 def _(text):
-    translations = load_translations(CURRENT_LOCALE.code)
+    code = st.session_state.locale.code
+    translations = load_translations(code)
     return translations.gettext(text)

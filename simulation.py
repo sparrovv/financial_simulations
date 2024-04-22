@@ -2,14 +2,16 @@ import sys
 from pathlib import Path
 import streamlit as st
 import pandas as pd
-import decimal
 from decimal import Decimal
+
+from streamlit.web.server.websocket_headers import _get_websocket_headers
 
 project_root = Path.cwd()
 src_path = project_root / "src"
 
 sys.path.append(str(src_path))
 
+from view.locale import set_locale
 from finsim.properties import InvestmentProperty
 from finsim.simulations import FireSimulation, run_simulation
 from view.sidebar import (
@@ -19,7 +21,16 @@ from view.sidebar import (
     update_query_params,
 )
 from view.helpers import first_day_of_the_month
+from logging import getLogger
 
+logger = getLogger(__name__)
+
+try:
+    headers = _get_websocket_headers()
+except Exception as e:
+    logger.error(f"Error while getting headers: {e}")
+    headers = {}
+locale = set_locale(headers)
 
 if "query_params_read" not in st.session_state:
     hardcoded_defaults = get_simple_sidebar_defaults()

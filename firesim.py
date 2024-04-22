@@ -21,10 +21,16 @@ from view.sidebar import (
 )
 from finsim.simulations import FireSimulation, run_fire_simulation
 from finsim.properties import InvestmentProperty
+from logging import getLogger
+
+logger = getLogger(__name__)
 
 
-headers = _get_websocket_headers()
-
+try:
+    headers = _get_websocket_headers()
+except Exception as e:
+    logger.error(f"Error while getting headers: {e}")
+    headers = {}
 locale = set_locale(headers)
 
 if "query_params_read" not in st.session_state:
