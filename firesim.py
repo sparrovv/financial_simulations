@@ -42,6 +42,7 @@ if "query_params_read" not in st.session_state:
 
 
 with st.sidebar:
+    "language: ", locale.lang
     sidebarAttrs = fire_sidebar(project_root)
     update_query_params(sidebarAttrs)
 
