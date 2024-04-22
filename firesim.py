@@ -1,16 +1,17 @@
 import sys
 from pathlib import Path
-import streamlit as st
-import pandas as pd
-import datetime
-from decimal import Decimal
-
 
 project_root = Path.cwd()
 src_path = project_root / "src"
 
 sys.path.append(str(src_path))
 
+import streamlit as st
+import pandas as pd
+import datetime
+from decimal import Decimal
+from streamlit.web.server.websocket_headers import _get_websocket_headers
+from view.locale import set_locale, _
 from view.helpers import first_day_of_the_month
 from view.sidebar import (
     fire_sidebar,
@@ -21,6 +22,10 @@ from view.sidebar import (
 from finsim.simulations import FireSimulation, run_fire_simulation
 from finsim.properties import InvestmentProperty
 
+
+headers = _get_websocket_headers()
+
+locale = set_locale(headers)
 
 if "query_params_read" not in st.session_state:
     b = get_fire_sidebar_defaults()
@@ -37,25 +42,11 @@ with st.sidebar:
 
 with st.container(border=False):
 
-    st.title("When can I stop working?")
-
-    """
-    **This is a simple simulation of the FIRE (Financial Independence, Retire Early) concept.**
-    The simulation will calculate how long you need to work to retire early and live from your investments, given you invest the surplus of the cash.
-
-    Configure your current financial situation, that includes:
-    - the monthly income, net of taxes, the monthly expenses
-    - current investments, like: stocks, bonds, and cash.
-    - investment properties, if you have any.
-    - configure the expected return rates and inflation rate
-
-
-    **The simulation does not take into account the taxes and pension, just your actual savings**
-
-    """
-
     def to_d(v: float) -> Decimal:
         return Decimal(str(v))
+
+    with open(f"docs/firesim_intro_{locale.lang}.md", "r") as f:
+        st.markdown(f.read())
 
     init = FireSimulation(
         stock_investments=to_d(sidebarAttrs.stock_investment),
@@ -105,16 +96,30 @@ with st.container(border=False):
         years_to_retire = (
             first_month_with_zero_income.index[0].year - datetime.datetime.now().year
         )
-        st.subheader(
-            f"Retire in {years_to_retire} years, {first_month_with_zero_income.index[0].strftime('%B %Y')}"
-        )
-        "From that month your income will be zero, and you will live from your investments."
-    else:
-        st.subheader(
-            "With current configuration, you will always need some kind of income stream."
+        fire_date = first_month_with_zero_income.index[0].strftime("%B %Y")
+
+        retire_text = " ".join(
+            [
+                _("Retire in"),
+                str(years_to_retire),
+                _("years,"),
+                fire_date,
+            ]
         )
 
-    st.subheader("FIRE curve - for how long you will need to work?")
+        st.subheader(retire_text)
+
+        _(
+            "From that month your income will be zero, and you will live from your investments."
+        )
+    else:
+        st.subheader(
+            _(
+                "With current configuration, you will always need some kind of income stream."
+            )
+        )
+
+    st.subheader(_("FIRE curve - for how long you will need to work?"))
 
     st.bar_chart(
         df[
@@ -127,9 +132,10 @@ with st.container(border=False):
         ]
     )
 
-    st.subheader("Income and expenses")
+    st.subheader(_("income_expenses_breakdown"))
+
     st.line_chart(df[["monthly_expenses", "monthly_income"]])
 
-    st.subheader("Month by month details")
+    st.subheader(_("Month by month details"))
 
     df

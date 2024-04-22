@@ -42,3 +42,31 @@ pipx install nox
 
 nox
 ```
+
+## locales
+
+To support multiple languages, this project uses babel python library. 
+To create the base translation file, run:
+
+```sh
+pybabel extract src/view -o locale/base.pot         
+```
+
+To create a new translation file, run:
+
+```sh
+pybabel init -i locale/base.pot -d locale -l pl_PL
+pybabel init -i locale/base.pot -d locale -l en_US
+```
+
+To update the translation file, run:
+
+```sh
+pybabel update -i locale/base.pot -d locale
+```
+
+To compile the translation file, run:
+
+```sh
+pybabel compile -d locale
+```

@@ -1,0 +1,183 @@
+# Polish (Poland) translations for PROJECT.
+# Copyright (C) 2024 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2024-04-22 21:00+0200\n"
+"PO-Revision-Date: 2024-04-22 10:02+0200\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: pl_PL\n"
+"Language-Team: pl_PL <LL@li.org>\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && "
+"(n%100<10 || n%100>=20) ? 1 : 2);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.14.0\n"
+
+#: firesim.py:103
+msgid "Retire in"
+msgstr "Emerytura po"
+
+#: firesim.py:105
+msgid "years,"
+msgstr "latach,"
+
+#: firesim.py:112
+msgid ""
+"From that month your income will be zero, and you will live from your "
+"investments."
+msgstr ""
+"Od tej daty nie musisz juz pracować, bo twoje oszczędności powinny "
+"wystarczyć do końca twojego zycia."
+
+#: firesim.py:117
+msgid ""
+"With current configuration, you will always need some kind of income "
+"stream."
+msgstr "Wygląda na to ze musisz cały czas pracować"
+
+#: firesim.py:122
+msgid "FIRE curve - for how long you will need to work?"
+msgstr "Krzywa FIRE - jak długo jeszcze musisz pracować?"
+
+#: firesim.py:135
+msgid "income_expenses_breakdown"
+msgstr "Podaj miesięczne dochody i wydatki:"
+
+#: firesim.py:139
+msgid "Month by month details"
+msgstr "Szczegóły miesiąc po miesiącu"
+
+#: src/view/sidebar.py:64 src/view/sidebar.py:133
+msgid "Select currency code"
+msgstr "Wybierz walutę"
+
+#: src/view/sidebar.py:67
+msgid "How many years to simulate?"
+msgstr "Ile lat zasymulować?"
+
+#: src/view/sidebar.py:69
+msgid "Simulating for"
+msgstr "Symulacja na"
+
+#: src/view/sidebar.py:69
+msgid "years"
+msgstr "lata"
+
+#: src/view/sidebar.py:136
+msgid "How old are you?"
+msgstr "Ile masz lat?"
+
+#: src/view/sidebar.py:138
+msgid "Life expectancy?"
+msgstr "Oczekiwana długość życia?"
+
+#: src/view/sidebar.py:157
+msgid "Provide monthly income and expenses:"
+msgstr "Podaj miesięczne dochody i wydatki:"
+
+#: src/view/sidebar.py:159
+msgid "Monthly salary"
+msgstr "Miesięczne wynagrodzenie"
+
+#: src/view/sidebar.py:162
+msgid "Monthly expenses"
+msgstr "Miesięczne wydatki"
+
+#: src/view/sidebar.py:167
+msgid "Stocks / ETFs"
+msgstr "Akcje / ETF-y"
+
+#: src/view/sidebar.py:169
+msgid "Bonds"
+msgstr "Obligacje"
+
+#: src/view/sidebar.py:171
+msgid "Cash"
+msgstr "Gotówka"
+
+#: src/view/sidebar.py:174
+msgid "Invest cash surplus"
+msgstr "Zainwestuj nadwyżkę gotówki"
+
+#: src/view/sidebar.py:177
+msgid "Invest cash surplus strategy"
+msgstr "Strategia inwestowania nadwyżki gotówki"
+
+#: src/view/sidebar.py:184
+msgid "Invest cash threshold"
+msgstr "Próg inwestowania gotówki"
+
+#: src/view/sidebar.py:190
+msgid "Any investment properties?"
+msgstr "Czy posiadasz jakiekolwiek nieruchomości inwestycyjne?"
+
+#: src/view/sidebar.py:193
+msgid "Number of investment properties?"
+msgstr "Liczba nieruchomości inwestycyjnych"
+
+#: src/view/sidebar.py:198
+msgid "Property"
+msgstr "Nieruchomość"
+
+#: src/view/sidebar.py:200
+msgid "Market value"
+msgstr "Wartość rynkowa"
+
+#: src/view/sidebar.py:202
+msgid "Mortgage left"
+msgstr "Pozostały kredyt hipoteczny"
+
+#: src/view/sidebar.py:204
+msgid "Mortgage months"
+msgstr "Liczba miesięcy kredytu hipotecznego"
+
+#: src/view/sidebar.py:206
+msgid "Mortgage rate"
+msgstr "Oprocentowanie kredytu hipotecznego"
+
+#: src/view/sidebar.py:208
+msgid "Property monthly income"
+msgstr "Miesięczny dochód z nieruchomości"
+
+#: src/view/sidebar.py:212
+msgid "Annual rent increase rate"
+msgstr "Roczna stopa wzrostu czynszu"
+
+#: src/view/sidebar.py:227
+msgid "Configuration parameters"
+msgstr "Parametry konfiguracji"
+
+#: src/view/sidebar.py:230
+msgid "Inflation rate calc"
+msgstr "Obliczanie stopy inflacji"
+
+#: src/view/sidebar.py:239
+msgid "annual_inflation_rate"
+msgstr "Roczna stopa inflacji"
+
+#: src/view/sidebar.py:247
+msgid "Stock / ETF type calculation"
+msgstr "Typ obliczania akcji / ETF"
+
+#: src/view/sidebar.py:254
+msgid "Annual stock return rate"
+msgstr "Roczna stopa zwrotu z akcji"
+
+#: src/view/sidebar.py:262
+msgid "Annual bonds return rate"
+msgstr "Roczna stopa zwrotu z obligacji"
+
+#: src/view/sidebar.py:265
+msgid "Annual income increase rate"
+msgstr "Roczna stopa wzrostu dochodu"
+
+#: src/view/sidebar.py:271
+msgid "Annual property appreciation rate"
+msgstr "Roczna stopa wzrostu wartości nieruchomości"
+

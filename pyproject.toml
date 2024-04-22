@@ -12,6 +12,7 @@ pandas = "^2.2.1"
 plotly = "^5.20.0"
 streamlit = "^1.32.2"
 yfinance = "^0.2.38"
+babel = "^2.14.0"
 
 
 [tool.poetry.group.dev.dependencies]
