@@ -21,15 +21,15 @@ class Locale:
 
 
 pl = Locale(lang=Lang.pl.value, code="pl_PL", search_term="pl")
-en = Locale(lang=Lang.en.value, code="en_US", search_term="en-US")
+en = Locale(lang=Lang.en.value, code="en_US", search_term="en")
 VALID_LOCALES = [pl, en]
 
 
-def set_locale(headers: dict, default_locale: Locale = pl):
+def set_locale(headers: dict, default_locale: Locale = en):
     locale = default_locale
     if "Accept-Language" in headers:
         accept_header = headers.get("Accept-Language", None)
-        language = accept_header.split(",")[0].split(";")[0]
+        language = accept_header.split(",")[0].split(";")[0].split("-")[0]
 
         for valid_locale in VALID_LOCALES:
             # compare with language search term case insensitive
