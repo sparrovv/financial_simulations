@@ -47,7 +47,7 @@ msgstr "Krzywa FIRE - jak długo jeszcze musisz pracować?"
 
 #: firesim.py:135
 msgid "income_expenses_breakdown"
-msgstr "Podaj miesięczne dochody i wydatki:"
+msgstr "Symulowane wydatki i przychody"
 
 #: firesim.py:139
 msgid "Month by month details"

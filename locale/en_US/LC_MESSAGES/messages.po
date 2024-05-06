@@ -44,11 +44,11 @@ msgstr ""
 
 #: firesim.py:135
 msgid "income_expenses_breakdown"
-msgstr "Provide monthly income and expenses:"
+msgstr "Simulated breakdown of monthly expenses and income"
 
 #: firesim.py:139
 msgid "Month by month details"
-msgstr "Mont on month details"
+msgstr "Month on month details"
 
 #: src/view/sidebar.py:64 src/view/sidebar.py:133
 msgid "Select currency code"
